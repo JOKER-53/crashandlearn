@@ -91,16 +91,19 @@ def evaluate_agent(
     render_mode = "rgb_array" if record else None
     env = make_lunar_lander_env(reward_mode=reward_mode, render_mode=render_mode)
 
+    hud = None
     if record:
         os.makedirs(video_dir, exist_ok=True)
-        # Record every episode requested
-        env = gym.wrappers.RecordVideo(
-            env,
-            video_folder=video_dir,
-            episode_trigger=lambda ep: True,
-            name_prefix=f"eval_{os.path.basename(model_path).replace('.zip', '')}",
-        )
-        print(f"[*] Recording enabled. Saving video clips to '{video_dir}/'")
+        import imageio
+        from telemetry_hud import TelemetryHUD
+        # Determine mode string for HUD
+        detected_mode = reward_mode
+        if "hack" in model_path:
+            detected_mode = "hack"
+        elif "fixed" in model_path:
+            detected_mode = "fixed"
+        hud = TelemetryHUD(mode=detected_mode)
+        print(f"[*] Telemetry HUD recording enabled. Saving video clips to '{video_dir}/'")
 
     episode_rewards: List[float] = []
     episode_lengths: List[int] = []
@@ -118,12 +121,25 @@ def evaluate_agent(
         total_reward = 0.0
         steps = 0
 
+        recorded_frames = []
+        if record and hud:
+            frame = env.render()
+            if frame is not None:
+                hud_frame = hud.draw_hud(frame, obs, steps, total_reward)
+                recorded_frames.append(hud_frame)
+
         while not done:
             action, _ = model.predict(obs, deterministic=deterministic)
             obs, reward, terminated, truncated, info = env.step(action)
             total_reward += reward
             steps += 1
             done = terminated or truncated
+
+            if record and hud:
+                frame = env.render()
+                if frame is not None:
+                    hud_frame = hud.draw_hud(frame, obs, steps, total_reward)
+                    recorded_frames.append(hud_frame)
 
         episode_rewards.append(total_reward)
         episode_lengths.append(steps)
@@ -141,6 +157,26 @@ def evaluate_agent(
         else:
             outcome = "TOUCHDOWN"
             landed_count += 1
+
+        # Add terminal banner freeze-frames to end of recording
+        if record and hud and recorded_frames:
+            last_frame = recorded_frames[-1]
+            banner_frame = hud.draw_hud(
+                env.render() if env.render() is not None else last_frame,
+                obs,
+                steps,
+                total_reward,
+                terminal_status=outcome,
+            )
+            # Add 25 frames (1 second freeze) showing the terminal outcome banner
+            for _ in range(25):
+                recorded_frames.append(banner_frame)
+
+            video_filename = os.path.join(
+                video_dir, f"eval_{os.path.basename(model_path).replace('.zip', '')}-episode-{ep-1}.mp4"
+            )
+            import imageio
+            imageio.mimsave(video_filename, recorded_frames, fps=30)
 
         print(f"{ep:3d} | {steps:5d} | {total_reward:8.2f} | {outcome:<15}")
 
