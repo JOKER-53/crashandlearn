@@ -77,7 +77,6 @@ class LanderDuelGame:
         # Load AI model
         print(f"[*] Loading AI model from: {model_path}")
         if not os.path.exists(model_path) and not os.path.exists(f"{model_path}.zip"):
-            print(f"[!] Warning: Model file '{model_path}' not found.")
             if os.path.exists("models/ppo_deep_discrete.zip"):
                 model_path = "models/ppo_deep_discrete"
                 print(f"[*] Falling back to default: {model_path}")
@@ -85,7 +84,14 @@ class LanderDuelGame:
                 model_path = "models/ppo_default"
                 print(f"[*] Falling back to default: {model_path}")
 
-        self.model = PPO.load(model_path)
+        if os.path.exists(model_path) or os.path.exists(f"{model_path}.zip"):
+            self.model = PPO.load(model_path)
+        else:
+            print(f"[!] Warning: No pretrained model found at '{model_path}'. Initializing baseline PPO policy.")
+            dummy_env = gym.make("LunarLander-v3")
+            self.model = PPO("MlpPolicy", dummy_env, n_steps=64)
+            dummy_env.close()
+
         self.model_name = os.path.basename(model_path).replace(".zip", "")
 
         # Initialize environments
