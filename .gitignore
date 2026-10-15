@@ -38,7 +38,7 @@ htmlcov/
 models/
 runs/
 logs/
-videos/temp/
+videos/
 *.zip
 
 # Notebooks & IDE

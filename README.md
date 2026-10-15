@@ -4,7 +4,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![RL](https://img.shields.io/badge/Algorithm-PPO-orange?style=flat-square)
 ![Gymnasium](https://img.shields.io/badge/Gymnasium-LunarLander--v3-purple?style=flat-square)
-![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)
+![Colab](https://img.shields.io/badge/Open%20in-Colab-f9ab00?style=flat-square&logo=googlecolab)
 
 > Training an AI agent to land a rocket using Proximal Policy Optimization (PPO) — with hands-on reward shaping experiments that deliberately break and fix the agent.
 
@@ -22,10 +22,11 @@ The same principles powering this simulation underlie real-world systems. Tesla'
 
 | Default Reward | Reward Hacking | Fixed Reward |
 |:-:|:-:|:-:|
+| ![Default Reward](assets/demo_default.gif) | ![Reward Hacking](assets/demo_hack.gif) | ![Fixed Reward](assets/demo_fixed.gif) |
 | Agent learns to land | Agent learns to hover | Agent lands again |
 | ✅ Solved (~200 pts avg) | ❌ Hovers indefinitely | ✅ Solved again |
 
-> Clips recorded using `gymnasium.wrappers.RecordVideo`
+> Clips recorded using `gymnasium.wrappers.RecordVideo` and converted to lightweight web GIFs.
 
 ---
 
