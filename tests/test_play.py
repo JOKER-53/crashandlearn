@@ -70,3 +70,18 @@ def test_lander_duel_game_step():
         assert len(game.ai_obs) == 8
     finally:
         game.close()
+
+
+def test_lander_duel_game_wind():
+    os.environ["SDL_VIDEODRIVER"] = "dummy"
+    game = LanderDuelGame(model_path="models/ppo_default", mode="duel", seed=123, enable_wind=True, wind_power=20.0)
+    try:
+        assert game.enable_wind is True
+        assert game.wind_power == 20.0
+        game.step_human(1)
+        game.step_ai()
+        assert game.human_steps == 1
+        assert game.ai_steps == 1
+    finally:
+        game.close()
+
