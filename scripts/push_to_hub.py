@@ -141,6 +141,20 @@ Released under the **MIT License**. Created by [Kadhiravan E. G.](https://github
 """
 
 
+def validate_auth_and_repo(api: HfApi, token: str, repo_id: str) -> None:
+    """Verifies token identity and alerts if repo-id namespace does not match."""
+    try:
+        user_info = api.whoami(token=token)
+        username = user_info.get("name")
+        print(f"[*] Authenticated as Hugging Face user: '{username}'")
+        expected_prefix = repo_id.split("/")[0] if "/" in repo_id else repo_id
+        if username.lower() != expected_prefix.lower():
+            print(f"\n[!] Notice: Your token belongs to '{username}', but repo-id namespace is '{expected_prefix}'.")
+            print(f"[*] To upload under your personal account, use: --repo-id {username}/{repo_id.split('/')[-1]}\n")
+    except Exception as e:
+        print(f"[*] Token verification note: {e}")
+
+
 def push_model_to_hub(
     repo_id: str,
     token: Optional[str] = None,
@@ -174,8 +188,25 @@ def push_model_to_hub(
         print("[!] Error: No Hugging Face token provided. Pass --token or set export HF_TOKEN='hf_...'")
         sys.exit(1)
 
+    validate_auth_and_repo(api, token, repo_id)
+
     print(f"[*] Creating / Verifying Hugging Face repository: {repo_id}")
-    create_repo(repo_id=repo_id, token=token, repo_type="model", exist_ok=True)
+    try:
+        create_repo(repo_id=repo_id, token=token, repo_type="model", exist_ok=True)
+    except Exception as e:
+        if "403" in str(e) or "Forbidden" in str(e):
+            print("\n" + "=" * 72)
+            print(" [!] HUGGING FACE PERMISSION ERROR (403 Forbidden)")
+            print("=" * 72)
+            print(" 1. WRONG USERNAME / NAMESPACE:")
+            print("    Check your exact Hugging Face username at: https://huggingface.co/settings/profile")
+            print(f"    Ensure --repo-id begins with your HF username: --repo-id <YOUR-HF-USERNAME>/{repo_id.split('/')[-1]}")
+            print("\n 2. TOKEN NEEDS 'WRITE' PERMISSION:")
+            print("    Tokens created as 'Read' (default) cannot create repositories.")
+            print("    Go to: https://huggingface.co/settings/tokens")
+            print("    Create a new token with Type set to 'Write' (or check repo creation permissions).")
+            print("=" * 72 + "\n")
+        sys.exit(1)
 
     # 1. Upload Model Card
     print("[*] Uploading Model Card (README.md)...")
@@ -256,8 +287,25 @@ Interactive in-browser WebAssembly flight simulator pitting human pilots against
         print("[!] Error: No Hugging Face token provided. Pass --token or set export HF_TOKEN='hf_...'")
         sys.exit(1)
 
+    validate_auth_and_repo(api, token, repo_id)
+
     print(f"[*] Creating / Verifying Hugging Face Space: {repo_id}")
-    create_repo(repo_id=repo_id, token=token, repo_type="space", space_sdk="static", exist_ok=True)
+    try:
+        create_repo(repo_id=repo_id, token=token, repo_type="space", space_sdk="static", exist_ok=True)
+    except Exception as e:
+        if "403" in str(e) or "Forbidden" in str(e):
+            print("\n" + "=" * 72)
+            print(" [!] HUGGING FACE PERMISSION ERROR (403 Forbidden)")
+            print("=" * 72)
+            print(" 1. WRONG USERNAME / NAMESPACE:")
+            print("    Check your exact Hugging Face username at: https://huggingface.co/settings/profile")
+            print(f"    Ensure --repo-id begins with your HF username: --repo-id <YOUR-HF-USERNAME>/{repo_id.split('/')[-1]}")
+            print("\n 2. TOKEN NEEDS 'WRITE' PERMISSION:")
+            print("    Tokens created as 'Read' (default) cannot create Space repositories.")
+            print("    Go to: https://huggingface.co/settings/tokens")
+            print("    Create a new token with Type set to 'Write' (or check repo creation permissions).")
+            print("=" * 72 + "\n")
+        sys.exit(1)
 
     print("[*] Uploading Space README.md...")
     api.upload_file(
