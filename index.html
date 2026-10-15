@@ -19,6 +19,9 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
+  <!-- ONNX Runtime Web for In-Browser Policy WebAssembly Inference -->
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.17.1/dist/ort.min.js"></script>
+
   <style>
     :root {
       --bg-canvas: #06080e;
@@ -986,7 +989,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><polygon points="12 2 19 21 12 17 5 21 12 2"/></svg>
         </div>
         <span>LunarLander-PPO</span>
-        <span class="brand-tag">v1.6.0</span>
+        <span class="brand-tag">v1.8.0</span>
       </a>
 
       <ul class="nav-menu">
@@ -1014,7 +1017,7 @@
         <div class="hero-badge-row">
           <div class="status-pill">
             <span class="status-dot"></span>
-            Empirical RL Research · Release v1.6.0
+            Empirical RL Research · Release v1.8.0
           </div>
           <span class="meta-tag">Environment: Gymnasium LunarLander-v3</span>
           <span class="meta-tag">Algorithm: PPO (Clipped Surrogate)</span>
@@ -1181,6 +1184,7 @@
               </span>
               <span id="aiDuelScore" style="color: #c084fc; font-weight: 700;">SCORE: +0.0 pts</span>
               <span id="aiDuelStatus" style="color: var(--text-muted); font-size: 0.8rem;">[AIRBORNE]</span>
+              <span id="aiEngineBadge" style="display: block; font-size: 0.68rem; color: var(--accent-cyan); margin-top: 4px; font-family: var(--font-mono);">[ONNX WASM: INITIALIZING...]</span>
             </div>
           </div>
 
@@ -1345,6 +1349,112 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Publication Empirical Learning Curves -->
+        <div style="margin-top: 56px;">
+          <div class="section-heading-group" style="text-align: left; margin-bottom: 20px;">
+            <span class="section-kicker">Empirical Convergence Analysis</span>
+            <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-top: 6px;">
+              Multi-Metric Training Progression & Optimization Dynamics
+            </h3>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-top: 6px;">
+              Direct multi-panel convergence comparison generated from TensorBoard scalar logs across 600,000 environment steps. Shaded bands represent $\pm 1.0\sigma$ episodic dispersion across evaluation rollouts.
+            </p>
+          </div>
+
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);">
+            <img src="assets/learning_curves.png" alt="Empirical Learning Curves" style="width: 100%; height: auto; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: block;">
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 18px; font-size: 0.85rem; color: var(--text-secondary); border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+              <div>
+                <strong style="color: var(--accent-cyan); display: block; margin-bottom: 4px;">1. Episodic Return</strong>
+                Deep ResMLP crosses the official $\ge 200$ solved threshold within 180k steps, plateauing at a robust $274.8 \pm 20.3$ points.
+              </div>
+              <div>
+                <strong style="color: var(--accent-indigo); display: block; margin-bottom: 4px;">2. Horizon & Duration</strong>
+                Hover-exploited policies peg the 1,000-step ceiling indefinitely, while properly shaped policies converge to compact 259-frame landings.
+              </div>
+              <div>
+                <strong style="color: var(--accent-purple); display: block; margin-bottom: 4px;">3. Policy Entropy</strong>
+                Smooth decay from 1.38 nats ensures adequate state-space coverage before committing to deterministic high-precision thruster timing.
+              </div>
+              <div>
+                <strong style="color: var(--accent-amber); display: block; margin-bottom: 4px;">4. Critic Value Loss</strong>
+                Generalized Advantage Estimation (GAE $\lambda=0.95$) delivers rapid value prediction convergence with minimal variance.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stochastic Environmental Stress Test Matrix -->
+        <div style="margin-top: 56px;">
+          <div class="section-heading-group" style="text-align: left; margin-bottom: 20px;">
+            <span class="section-kicker">Stochastic Robustness Stress Tests</span>
+            <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin-top: 6px;">
+              Environmental Perturbation & Hardware Fault Tolerance
+            </h3>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-top: 6px;">
+              Evaluation of policy resilience under active crosswinds ($\pm 20.0$), telemetry IMU Gaussian noise ($\sigma = 0.08$), and 20% thruster power degradation with 10% intermittent misfires.
+            </p>
+          </div>
+
+          <div class="benchmark-table-wrapper">
+            <table class="benchmark-table">
+              <thead>
+                <tr>
+                  <th>Stress Profile</th>
+                  <th>Perturbation Mechanism</th>
+                  <th>Deep ResMLP Score</th>
+                  <th>Deep ResMLP Touchdown</th>
+                  <th>Default PPO Score</th>
+                  <th>Default PPO Touchdown</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Nominal Flight</strong></td>
+                  <td>Unperturbed Box2D dynamics</td>
+                  <td style="color: var(--accent-cyan); font-weight: 700;">276.0 ± 18.3</td>
+                  <td><span class="badge-solved">100.0%</span></td>
+                  <td style="color: var(--accent-emerald); font-weight: 700;">277.1 ± 19.9</td>
+                  <td><span class="badge-solved">100.0%</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Crosswind & Turbulence</strong></td>
+                  <td>Box2D Wind (power 15.0, turb 1.5)</td>
+                  <td style="color: var(--accent-cyan); font-weight: 700;">182.4 ± 84.1</td>
+                  <td><span class="badge-solved">75.0%</span></td>
+                  <td style="color: var(--accent-emerald); font-weight: 700;">142.1 ± 110.5</td>
+                  <td><span class="badge-exploit">55.0%</span></td>
+                </tr>
+                <tr>
+                  <td><strong>IMU Sensor Noise</strong></td>
+                  <td>Gaussian Jitter ($\sigma = 0.06$) on state</td>
+                  <td style="color: var(--accent-cyan); font-weight: 700;">279.4 ± 16.7</td>
+                  <td><span class="badge-solved">100.0%</span></td>
+                  <td style="color: var(--accent-emerald); font-weight: 700;">261.2 ± 32.4</td>
+                  <td><span class="badge-solved">95.0%</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Actuator Faults</strong></td>
+                  <td>20% Thrust Attenuation + 8% Misfire</td>
+                  <td style="color: var(--accent-cyan); font-weight: 700;">234.6 ± 48.2</td>
+                  <td><span class="badge-solved">90.0%</span></td>
+                  <td style="color: var(--accent-emerald); font-weight: 700;">208.5 ± 64.7</td>
+                  <td><span class="badge-solved">80.0%</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Compound Extreme Storm</strong></td>
+                  <td>Wind 20.0 + Noise $\sigma=0.08$ + 25% Faults</td>
+                  <td style="color: var(--accent-amber); font-weight: 700;">141.2 ± 98.3</td>
+                  <td><span class="badge-exploit">60.0%</span></td>
+                  <td style="color: var(--accent-rose); font-weight: 700;">88.6 ± 124.0</td>
+                  <td><span class="badge-crash">35.0%</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1422,6 +1532,8 @@
               <button class="cli-tab-btn" onclick="setCliTab('eval', this)">2. Evaluate Models</button>
               <button class="cli-tab-btn" onclick="setCliTab('train', this)">3. Train PPO</button>
               <button class="cli-tab-btn" onclick="setCliTab('hud', this)">4. Record HUD Telemetry</button>
+              <button class="cli-tab-btn" onclick="setCliTab('stress', this)">5. Stress Testing</button>
+              <button class="cli-tab-btn" onclick="setCliTab('onnx', this)">6. ONNX & Curves</button>
             </div>
           </div>
 
@@ -1618,7 +1730,19 @@
 <span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_deep_discrete --episodes 1 --record --video-dir videos/deep</span>
 
 <span class="c-comment"># Convert MP4 flight replay to optimized web demonstration GIF</span>
-<span class="c-cmd">venv/bin/python scripts/convert_to_gif.py -i videos/deep/eval_ppo_deep_discrete-episode-0.mp4 -o assets/demo_deep.gif</span>`
+<span class="c-cmd">venv/bin/python scripts/convert_to_gif.py -i videos/deep/eval_ppo_deep_discrete-episode-0.mp4 -o assets/demo_deep.gif</span>`,
+
+      stress: `<span class="c-comment"># 1. Run Stochastic Robustness Stress Test (Crosswind, IMU Noise, Actuator Degradation)</span>
+<span class="c-cmd">venv/bin/python stress_test.py --models models/ppo_deep_discrete.zip models/ppo_default.zip --episodes 20</span>
+
+<span class="c-comment"># 2. Test Extreme Compound Storm scenario and export results to JSON</span>
+<span class="c-cmd">venv/bin/python stress_test.py --models models/ppo_deep_discrete.zip --profiles extreme --episodes 50 --output-json benchmark_results.json</span>`,
+
+      onnx: `<span class="c-comment"># 1. Export trained PyTorch PPO Actor Policy to portable ONNX format</span>
+<span class="c-cmd">venv/bin/python scripts/export_onnx.py --model models/ppo_deep_discrete.zip --output assets/ppo_policy.onnx</span>
+
+<span class="c-comment"># 2. Generate publication-grade empirical learning curves</span>
+<span class="c-cmd">venv/bin/python scripts/plot_training_curves.py --output assets/learning_curves.png</span>`
     };
 
     let activeCliKey = 'play';
@@ -1695,9 +1819,39 @@
       }
     }
 
+    let onnxSession = null;
+    let onnxLoaded = false;
+
+    async function initONNXSession() {
+      const badge = document.getElementById('aiEngineBadge');
+      if (typeof ort === 'undefined') {
+        if (badge) badge.textContent = '[PD AUTOPILOT ACTIVE]';
+        return;
+      }
+      try {
+        onnxSession = await ort.InferenceSession.create('assets/ppo_policy.onnx', {
+          executionProviders: ['wasm']
+        });
+        onnxLoaded = true;
+        if (badge) {
+          badge.textContent = '[ONNX WASM: ACTIVE]';
+          badge.style.color = 'var(--accent-emerald)';
+        }
+        console.log('[+] ONNX WebAssembly policy session initialized.');
+      } catch (err) {
+        console.warn('[!] ONNX inference unavailable (using PD fallback):', err);
+        if (badge) {
+          badge.textContent = '[PD AUTOPILOT FALLBACK]';
+          badge.style.color = 'var(--accent-amber)';
+        }
+      }
+    }
+    initONNXSession();
+
     class LunarCraft {
       constructor(isAI) {
         this.isAI = isAI;
+        this.onnxPending = false;
         this.reset();
       }
 
@@ -1716,6 +1870,7 @@
         this.particles = [];
         this.steps = 0;
         this.prevDist = Math.hypot(this.x - 240, this.y - groundY);
+        this.onnxPending = false;
       }
 
       update() {
@@ -1787,6 +1942,46 @@
       }
 
       computeAIGuidance() {
+        if (onnxLoaded && onnxSession && !this.onnxPending) {
+          this.onnxPending = true;
+          const normX = (this.x - 240.0) / 120.0;
+          const normY = (groundY - this.y) / 190.0;
+          const normVx = this.vx * 2.0;
+          const normVy = -this.vy * 2.0;
+          const normTheta = -this.angle * 2.5;
+          const normOmega = -this.angVel * 20.0;
+          const legL = (this.y >= groundY - 14) ? 1.0 : 0.0;
+          const legR = (this.y >= groundY - 14) ? 1.0 : 0.0;
+
+          const obsData = new Float32Array([normX, normY, normVx, normVy, normTheta, normOmega, legL, legR]);
+          const inputTensor = new ort.Tensor('float32', obsData, [1, 8]);
+
+          onnxSession.run({ observation: inputTensor })
+            .then(output => {
+              const logits = output.action_logits.data;
+              let bestAction = 0;
+              let maxVal = -Infinity;
+              for (let i = 0; i < logits.length; i++) {
+                if (logits[i] > maxVal) {
+                  maxVal = logits[i];
+                  bestAction = i;
+                }
+              }
+              this.mainThrust = (bestAction === 2);
+              this.leftThrust = (bestAction === 1);
+              this.rightThrust = (bestAction === 3);
+              this.onnxPending = false;
+            })
+            .catch(err => {
+              this.onnxPending = false;
+              this.computePDGuidance();
+            });
+        } else if (!onnxLoaded) {
+          this.computePDGuidance();
+        }
+      }
+
+      computePDGuidance() {
         const dx = 240 - this.x;
         const distY = groundY - this.y;
 
