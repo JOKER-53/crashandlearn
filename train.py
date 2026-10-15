@@ -85,11 +85,15 @@ def train(args: argparse.Namespace) -> None:
     print(f" Tensorboard Log: {args.tensorboard_log}")
     print("==================================================")
 
-    def env_fn():
-        env = make_lunar_lander_env(reward_mode=reward_mode)
-        return Monitor(env)
+    def make_single_env(rank: int):
+        def _init():
+            env = make_lunar_lander_env(reward_mode=reward_mode)
+            env.reset(seed=args.seed + rank if args.seed is not None else None)
+            return Monitor(env)
+        return _init
 
-    vec_env = DummyVecEnv([env_fn])
+    num_envs = 4
+    vec_env = DummyVecEnv([make_single_env(i) for i in range(num_envs)])
 
     # Check if tensorboard is available
     tb_log = args.tensorboard_log
@@ -99,17 +103,18 @@ def train(args: argparse.Namespace) -> None:
         print("[!] Note: tensorboard not installed. Disabling TensorBoard logging.")
         tb_log = None
 
-    # Standard optimized PPO hyperparameters for LunarLander
+    # RL Zoo optimized PPO hyperparameters for LunarLander
     model = PPO(
         policy="MlpPolicy",
         env=vec_env,
         learning_rate=args.learning_rate,
         n_steps=1024,
         batch_size=64,
-        n_epochs=4,
+        n_epochs=10,
         gamma=0.999,
         gae_lambda=0.98,
         ent_coef=0.01,
+        clip_range=0.2,
         verbose=1,
         seed=args.seed,
         tensorboard_log=tb_log,
