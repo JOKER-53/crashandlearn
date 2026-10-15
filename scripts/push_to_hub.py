@@ -10,7 +10,17 @@ import argparse
 import os
 import sys
 from typing import Optional
-from huggingface_hub import HfApi, create_repo
+
+try:
+    from huggingface_hub import HfApi, create_repo
+except ImportError:
+    print("\n[!] Error: 'huggingface_hub' is not installed in your current Python environment.")
+    print("[*] Please activate the virtual environment or run with venv:")
+    print("      source venv/bin/activate")
+    print("      python scripts/push_to_hub.py ...")
+    print("   Or run directly with:")
+    print("      venv/bin/python scripts/push_to_hub.py ...\n")
+    sys.exit(1)
 
 
 def generate_model_card(repo_id: str, model_filename: str) -> str:
