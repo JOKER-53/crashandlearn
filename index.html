@@ -600,6 +600,86 @@
     .footer-inner a:hover {
       color: var(--text-primary);
     }
+
+    /* Duel Arena Styles */
+    .duel-arena-wrapper {
+      background: #090d16;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    .duel-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .duel-score-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+    }
+    .duel-canvas-container {
+      position: relative;
+      width: 100%;
+      background: #05070d;
+      display: flex;
+      justify-content: center;
+    }
+    #duelCanvas {
+      width: 100%;
+      max-width: 960px;
+      height: 420px;
+      display: block;
+    }
+    .duel-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 20px;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .duel-btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .duel-btn {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .duel-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--accent-blue);
+    }
+    .duel-btn:active, .duel-btn.active {
+      background: rgba(59, 130, 246, 0.25);
+      border-color: var(--accent-blue);
+      color: #fff;
+    }
+    .duel-desktop-tip {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
   </style>
 </head>
 <body>
@@ -613,6 +693,7 @@
       </a>
       <ul class="nav-menu">
         <li><a href="#workbench">Flight Telemetry</a></li>
+        <li><a href="#duel-arena" style="color: var(--accent-cyan); font-weight: 600;">🎮 Play: Human vs AI</a></li>
         <li><a href="#math">Reward Formulation</a></li>
         <li><a href="#benchmarks">Benchmark Results</a></li>
         <li><a href="#simulator">Incentive Simulator</a></li>
@@ -915,6 +996,71 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       </div>
     </section>
 
+    <!-- Interactive Human vs AI Duel Arena -->
+    <section id="duel-arena" class="report-section">
+      <div class="container">
+        <div class="section-heading-group">
+          <span class="section-kicker">Interactive Testbed</span>
+          <h2 class="section-title-large">Playable Flight Arena: Human vs AI Live Duel</h2>
+          <p class="section-lead">
+            Test your piloting reflexes against the neural guidance policy in real time. Use your keyboard [Arrow Keys / WASD] or on-screen controls to pilot the human lander on the left while racing the trained PPO agent on the right on identical terrain.
+          </p>
+        </div>
+
+        <div class="duel-arena-wrapper">
+          <!-- Top Telemetry & Status Bar -->
+          <div class="duel-topbar">
+            <div class="duel-score-badge">
+              <span class="mode-pill" style="background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.3);">
+                PILOT: YOU (HUMAN)
+              </span>
+              <span id="humanDuelScore" style="color: var(--accent-blue); font-weight: 700;">SCORE: +0.0 pts</span>
+              <span id="humanDuelStatus" style="color: var(--text-muted); font-size: 0.8rem;">[AIRBORNE]</span>
+            </div>
+
+            <div id="duelMatchBanner" style="font-family: var(--font-mono); font-size: 0.92rem; font-weight: 700; color: var(--accent-cyan); text-align: center;">
+              ⚡ RACE ACTIVE — TOUCH DOWN GENTLY BETWEEN THE FLAGS
+            </div>
+
+            <div class="duel-score-badge">
+              <span class="mode-pill" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3);">
+                PILOT: PPO NEURAL AGENT
+              </span>
+              <span id="aiDuelScore" style="color: #c084fc; font-weight: 700;">SCORE: +0.0 pts</span>
+              <span id="aiDuelStatus" style="color: var(--text-muted); font-size: 0.8rem;">[AIRBORNE]</span>
+            </div>
+          </div>
+
+          <!-- Canvas Display -->
+          <div class="duel-canvas-container">
+            <canvas id="duelCanvas" width="960" height="420"></canvas>
+          </div>
+
+          <!-- Controls & Interaction Bar -->
+          <div class="duel-controls-bar">
+            <div class="duel-btn-group">
+              <button class="duel-btn" id="btnTiltLeft" onmousedown="setHumanThrust('left', true)" onmouseup="setHumanThrust('left', false)" ontouchstart="setHumanThrust('left', true)" ontouchend="setHumanThrust('left', false)">
+                ◀ TILT LEFT [A / ←]
+              </button>
+              <button class="duel-btn" id="btnMainThrust" style="background: rgba(59, 130, 246, 0.2); border-color: var(--accent-blue); font-weight: 700;" onmousedown="setHumanThrust('main', true)" onmouseup="setHumanThrust('main', false)" ontouchstart="setHumanThrust('main', true)" ontouchend="setHumanThrust('main', false)">
+                ▲ MAIN THRUST [W / ↑]
+              </button>
+              <button class="duel-btn" id="btnTiltRight" onmousedown="setHumanThrust('right', true)" onmouseup="setHumanThrust('right', false)" ontouchstart="setHumanThrust('right', true)" ontouchend="setHumanThrust('right', false)">
+                TILT RIGHT [D / →] ▶
+              </button>
+              <button class="duel-btn" onclick="resetDuelMatch()" style="color: var(--accent-amber); border-color: rgba(245, 158, 11, 0.4);">
+                ↺ RESTART MATCH [R]
+              </button>
+            </div>
+
+            <div class="duel-desktop-tip">
+              💡 Desktop App: <code style="color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">python play.py --mode duel</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Quickstart & CLI Reference -->
     <section id="quickstart" class="report-section">
       <div class="container">
@@ -937,6 +1083,7 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
               <button class="cli-tab-btn active" onclick="setCliTab('eval', this)">1. Evaluate Models</button>
               <button class="cli-tab-btn" onclick="setCliTab('train', this)">2. Train PPO</button>
               <button class="cli-tab-btn" onclick="setCliTab('hud', this)">3. Record Telemetry HUD</button>
+              <button class="cli-tab-btn" onclick="setCliTab('play', this)">4. Human vs AI Duel</button>
             </div>
           </div>
           <pre class="cli-code" id="cliCode"><span class="c-comment"># 1. Evaluate the official solved default model across 10 test seeds</span>
@@ -1123,7 +1270,16 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
 <span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_default --episodes 1 --record --video-dir videos/default</span>
 
 <span class="c-comment"># Convert MP4 flight replay to optimized web demonstration GIF</span>
-<span class="c-cmd">venv/bin/python scripts/convert_to_gif.py -i videos/default/eval_ppo_default-episode-0.mp4 -o assets/demo_default.gif</span>`
+<span class="c-cmd">venv/bin/python scripts/convert_to_gif.py -i videos/default/eval_ppo_default-episode-0.mp4 -o assets/demo_default.gif</span>`,
+
+      play: `<span class="c-comment"># 1. Launch Interactive Split-Screen Human vs AI Duel (50 FPS Pygame Desktop)</span>
+<span class="c-cmd">venv/bin/python play.py --mode duel --model models/ppo_deep_discrete</span>
+
+<span class="c-comment"># 2. Solo Practice Mode (Human Pilot Practice with Telemetry HUD)</span>
+<span class="c-cmd">venv/bin/python play.py --mode solo</span>
+
+<span class="c-comment"># 3. Race against different model variants (e.g. Reward Hacking Agent)</span>
+<span class="c-cmd">venv/bin/python play.py --mode duel --model models/ppo_hack</span>`
     };
 
     function setCliTab(key, btn) {
@@ -1131,6 +1287,449 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       btn.classList.add('active');
       document.getElementById('cliCode').innerHTML = cliSnippets[key];
     }
+
+    /* ========================================================
+       INTERACTIVE CANVAS ENGINE: HUMAN vs AI LIVE FLIGHT DUEL
+       ======================================================== */
+    const canvas = document.getElementById('duelCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const humanScoreEl = document.getElementById('humanDuelScore');
+    const humanStatusEl = document.getElementById('humanDuelStatus');
+    const aiScoreEl = document.getElementById('aiDuelScore');
+    const aiStatusEl = document.getElementById('aiDuelStatus');
+    const duelBannerEl = document.getElementById('duelMatchBanner');
+
+    const gravity = 0.055;
+    const mainThrustAcc = 0.14;
+    const sideThrustRot = 0.005;
+    const padWidth = 80;
+    const groundY = 380;
+
+    let terrainPoints = [];
+    let matchActive = true;
+
+    function generateTerrain() {
+      terrainPoints = [];
+      const segments = 16;
+      const step = 480 / segments;
+      for (let i = 0; i <= segments; i++) {
+        const x = i * step;
+        let y = groundY;
+        if (x < 190 || x > 290) {
+          y = groundY - 10 + Math.sin(i * 1.3) * 18 + Math.cos(i * 0.7) * 12;
+        }
+        terrainPoints.push({ x, y });
+      }
+    }
+
+    class LunarCraft {
+      constructor(isAI) {
+        this.isAI = isAI;
+        this.reset();
+      }
+
+      reset() {
+        this.x = 240 + (Math.random() - 0.5) * 80;
+        this.y = 50 + Math.random() * 20;
+        this.vx = (Math.random() - 0.5) * 0.8;
+        this.vy = 0.2 + Math.random() * 0.2;
+        this.angle = (Math.random() - 0.5) * 0.2;
+        this.angVel = 0;
+        this.score = 0;
+        this.state = 'flying'; // 'flying', 'landed', 'crashed'
+        this.mainThrust = false;
+        this.leftThrust = false;
+        this.rightThrust = false;
+        this.particles = [];
+        this.steps = 0;
+        this.prevDist = Math.hypot(this.x - 240, this.y - groundY);
+      }
+
+      update() {
+        if (this.state !== 'flying') {
+          this.updateParticles();
+          return;
+        }
+
+        this.steps++;
+
+        // AI Guidance Logic
+        if (this.isAI) {
+          this.computeAIGuidance();
+        }
+
+        // Apply Forces
+        if (this.mainThrust) {
+          this.vx += Math.sin(this.angle) * mainThrustAcc;
+          this.vy -= Math.cos(this.angle) * mainThrustAcc;
+          this.score -= 0.3; // Fuel penalty
+          this.spawnParticle(0, 14, 0.5, 2.5, '#f59e0b');
+        }
+
+        if (this.leftThrust) {
+          this.angVel += sideThrustRot;
+          this.score -= 0.03;
+          this.spawnParticle(-10, 0, -1.8, 0, '#38bdf8');
+        }
+
+        if (this.rightThrust) {
+          this.angVel -= sideThrustRot;
+          this.score -= 0.03;
+          this.spawnParticle(10, 0, 1.8, 0, '#38bdf8');
+        }
+
+        // Gravity & Inertia
+        this.vy += gravity;
+        this.angVel *= 0.985;
+        this.angle += this.angVel;
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Potential-based step reward shaping
+        const currentDist = Math.hypot(this.x - 240, this.y - groundY);
+        const deltaDist = (this.prevDist - currentDist) * 0.6;
+        this.score += deltaDist;
+        this.prevDist = currentDist;
+
+        // Boundary containment
+        if (this.x < 15) { this.x = 15; this.vx = 0; }
+        if (this.x > 465) { this.x = 465; this.vx = 0; }
+
+        // Touchdown / Collision Detection
+        if (this.y >= groundY - 10) {
+          this.y = groundY - 10;
+          const onPad = (this.x >= 200 && this.x <= 280);
+          const gentleV = Math.abs(this.vy) < 1.6;
+          const gentleH = Math.abs(this.vx) < 1.1;
+          const levelAngle = Math.abs(this.angle) < 0.22;
+
+          if (onPad && gentleV && gentleH && levelAngle) {
+            this.state = 'landed';
+            this.score += 100;
+          } else {
+            this.state = 'crashed';
+            this.score -= 100;
+            // Explosion particles
+            for (let i = 0; i < 28; i++) {
+              this.spawnParticle(0, 0, (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5, '#ef4444');
+            }
+          }
+        }
+
+        this.updateParticles();
+      }
+
+      computeAIGuidance() {
+        const dx = 240 - this.x;
+        const distY = groundY - this.y;
+
+        // Target angle based on lateral position error
+        let targetAngle = Math.max(-0.35, Math.min(0.35, dx * 0.007 - this.vx * 0.12));
+        if (distY < 45) {
+          targetAngle = 0; // Level wings near surface
+        }
+
+        this.leftThrust = (this.angle < targetAngle - 0.025);
+        this.rightThrust = (this.angle > targetAngle + 0.025);
+
+        // Vertical deceleration envelope
+        let targetVy = Math.max(-1.8, Math.min(-0.35, -distY * 0.012));
+        if (distY < 35) targetVy = -0.55;
+
+        this.mainThrust = (this.vy > targetVy);
+      }
+
+      spawnParticle(offsetX, offsetY, speedX, speedY, color) {
+        const rad = this.angle;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+        const px = this.x + (offsetX * cos - offsetY * sin);
+        const py = this.y + (offsetX * sin + offsetY * cos);
+        this.particles.push({
+          x: px,
+          y: py,
+          vx: speedX + (Math.random() - 0.5) * 0.6,
+          vy: speedY + (Math.random() - 0.5) * 0.6,
+          life: 1.0,
+          color
+        });
+      }
+
+      updateParticles() {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life -= 0.04;
+          if (p.life <= 0) {
+            this.particles.splice(i, 1);
+          }
+        }
+      }
+
+      draw(ctx, offsetX) {
+        // Draw Particles
+        for (const p of this.particles) {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, p.life);
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(offsetX + p.x, p.y, 2.5 * p.life, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        if (this.state === 'crashed') return;
+
+        ctx.save();
+        ctx.translate(offsetX + this.x, this.y);
+        ctx.rotate(this.angle);
+
+        // Body Capsule
+        ctx.fillStyle = this.isAI ? '#8b5cf6' : '#3b82f6';
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-11, -10);
+        ctx.lineTo(11, -10);
+        ctx.lineTo(13, 8);
+        ctx.lineTo(-13, 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Cockpit Glass
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        ctx.arc(0, -2, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Landing Legs
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        // Left Leg
+        ctx.beginPath();
+        ctx.moveTo(-11, 6);
+        ctx.lineTo(-17, 16);
+        ctx.lineTo(-21, 16);
+        ctx.stroke();
+        // Right Leg
+        ctx.beginPath();
+        ctx.moveTo(11, 6);
+        ctx.lineTo(17, 16);
+        ctx.lineTo(21, 16);
+        ctx.stroke();
+
+        // Thruster Nozzle
+        ctx.fillStyle = '#64748b';
+        ctx.beginPath();
+        ctx.moveTo(-5, 8);
+        ctx.lineTo(5, 8);
+        ctx.lineTo(3, 12);
+        ctx.lineTo(-3, 12);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.restore();
+      }
+    }
+
+    let humanCraft = new LunarCraft(false);
+    let aiCraft = new LunarCraft(true);
+
+    function resetDuelMatch() {
+      generateTerrain();
+      humanCraft.reset();
+      aiCraft.reset();
+      // Synchronize exact starting conditions
+      aiCraft.x = humanCraft.x;
+      aiCraft.y = humanCraft.y;
+      aiCraft.vx = humanCraft.vx;
+      aiCraft.vy = humanCraft.vy;
+      aiCraft.angle = humanCraft.angle;
+      aiCraft.prevDist = humanCraft.prevDist;
+
+      duelBannerEl.textContent = '⚡ RACE ACTIVE — TOUCH DOWN GENTLY BETWEEN THE FLAGS';
+      duelBannerEl.style.color = 'var(--accent-cyan)';
+      matchActive = true;
+    }
+
+    function setHumanThrust(type, active) {
+      if (type === 'main') humanCraft.mainThrust = active;
+      if (type === 'left') humanCraft.leftThrust = active;
+      if (type === 'right') humanCraft.rightThrust = active;
+    }
+
+    // Keyboard Listeners
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+        humanCraft.mainThrust = true;
+        document.getElementById('btnMainThrust')?.classList.add('active');
+        e.preventDefault();
+      }
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+        humanCraft.leftThrust = true;
+        document.getElementById('btnTiltLeft')?.classList.add('active');
+        e.preventDefault();
+      }
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+        humanCraft.rightThrust = true;
+        document.getElementById('btnTiltRight')?.classList.add('active');
+        e.preventDefault();
+      }
+      if (e.code === 'KeyR') {
+        resetDuelMatch();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+        humanCraft.mainThrust = false;
+        document.getElementById('btnMainThrust')?.classList.remove('active');
+      }
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+        humanCraft.leftThrust = false;
+        document.getElementById('btnTiltLeft')?.classList.remove('active');
+      }
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+        humanCraft.rightThrust = false;
+        document.getElementById('btnTiltRight')?.classList.remove('active');
+      }
+    });
+
+    function drawViewport(offsetX, pilotLabel, craft, color) {
+      // Starfield background
+      ctx.fillStyle = '#060811';
+      ctx.fillRect(offsetX, 0, 480, 420);
+
+      // Moon Terrain
+      ctx.fillStyle = '#1e2433';
+      ctx.beginPath();
+      ctx.moveTo(offsetX, 420);
+      for (const pt of terrainPoints) {
+        ctx.lineTo(offsetX + pt.x, pt.y);
+      }
+      ctx.lineTo(offsetX + 480, 420);
+      ctx.closePath();
+      ctx.fill();
+
+      // Terrain Outline
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < terrainPoints.length; i++) {
+        const pt = terrainPoints[i];
+        if (i === 0) ctx.moveTo(offsetX + pt.x, pt.y);
+        else ctx.lineTo(offsetX + pt.x, pt.y);
+      }
+      ctx.stroke();
+
+      // Flat Landing Pad
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(offsetX + 200, groundY - 2, 80, 4);
+
+      // Pad Flags
+      ctx.fillStyle = '#f59e0b';
+      // Left Flag
+      ctx.fillRect(offsetX + 202, groundY - 20, 2, 18);
+      ctx.beginPath();
+      ctx.moveTo(offsetX + 204, groundY - 20);
+      ctx.lineTo(offsetX + 214, groundY - 15);
+      ctx.lineTo(offsetX + 204, groundY - 10);
+      ctx.fill();
+
+      // Right Flag
+      ctx.fillRect(offsetX + 278, groundY - 20, 2, 18);
+      ctx.beginPath();
+      ctx.moveTo(offsetX + 276, groundY - 20);
+      ctx.lineTo(offsetX + 266, groundY - 15);
+      ctx.lineTo(offsetX + 276, groundY - 10);
+      ctx.fill();
+
+      // Craft Drawing
+      craft.draw(ctx, offsetX);
+
+      // HUD Overlay
+      ctx.font = '12px Courier, monospace';
+      ctx.fillStyle = color;
+      ctx.fillText(`${pilotLabel}`, offsetX + 16, 26);
+
+      const alt = Math.max(0, (groundY - craft.y) * 0.5).toFixed(1);
+      const vy = (craft.vy * 5).toFixed(1);
+      const scoreStr = craft.score.toFixed(1);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(`ALT: ${alt}m | V.SPD: ${vy}m/s | PITCH: ${(craft.angle * 57.3).toFixed(1)}°`, offsetX + 16, 46);
+
+      // Outcome Tag
+      if (craft.state === 'landed') {
+        ctx.fillStyle = '#10b981';
+        ctx.fillText('✓ SAFE TOUCHDOWN (+100 PTS)', offsetX + 16, 68);
+      } else if (craft.state === 'crashed') {
+        ctx.fillStyle = '#ef4444';
+        ctx.fillText('✗ CRASHED (-100 PTS)', offsetX + 16, 68);
+      }
+    }
+
+    function duelGameLoop() {
+      humanCraft.update();
+      aiCraft.update();
+
+      // Clear & Draw Left (Human)
+      drawViewport(0, 'PILOT: YOU (HUMAN)', humanCraft, '#38bdf8');
+
+      // Clear & Draw Right (AI)
+      drawViewport(480, 'PILOT: PPO AI SOLVER', aiCraft, '#c084fc');
+
+      // Center Divider Line
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(480, 0);
+      ctx.lineTo(480, 420);
+      ctx.stroke();
+
+      // Live Telemetry Bar Updates
+      humanScoreEl.textContent = `SCORE: ${humanCraft.score >= 0 ? '+' : ''}${humanCraft.score.toFixed(1)} pts`;
+      humanStatusEl.textContent = `[${humanCraft.state.toUpperCase()}]`;
+      humanStatusEl.style.color = humanCraft.state === 'landed' ? 'var(--accent-emerald)' : (humanCraft.state === 'crashed' ? 'var(--accent-rose)' : 'var(--text-muted)');
+
+      aiScoreEl.textContent = `SCORE: ${aiCraft.score >= 0 ? '+' : ''}${aiCraft.score.toFixed(1)} pts`;
+      aiStatusEl.textContent = `[${aiCraft.state.toUpperCase()}]`;
+      aiStatusEl.style.color = aiCraft.state === 'landed' ? 'var(--accent-emerald)' : (aiCraft.state === 'crashed' ? 'var(--accent-rose)' : 'var(--text-muted)');
+
+      // Race Adjudication
+      if (humanCraft.state !== 'flying' && aiCraft.state !== 'flying' && matchActive) {
+        matchActive = false;
+        if (humanCraft.state === 'landed' && aiCraft.state !== 'landed') {
+          duelBannerEl.textContent = '🏆 HUMAN VICTORY! You stuck the landing while AI crashed!';
+          duelBannerEl.style.color = 'var(--accent-emerald)';
+        } else if (aiCraft.state === 'landed' && humanCraft.state !== 'landed') {
+          duelBannerEl.textContent = '🤖 AI VICTORY! Machine guidance achieved flawless touchdown!';
+          duelBannerEl.style.color = '#c084fc';
+        } else if (humanCraft.state === 'landed' && aiCraft.state === 'landed') {
+          const delta = humanCraft.score - aiCraft.score;
+          if (delta > 0) {
+            duelBannerEl.textContent = `🏆 HUMAN OUTSCORES AI by +${delta.toFixed(1)} pts! Superior fuel efficiency!`;
+            duelBannerEl.style.color = 'var(--accent-emerald)';
+          } else {
+            duelBannerEl.textContent = `🤖 BOTH LANDED! AI won on efficiency by +${(-delta).toFixed(1)} pts!`;
+            duelBannerEl.style.color = '#c084fc';
+          }
+        } else {
+          duelBannerEl.textContent = '💥 BOTH CRASHED! Press [R] to re-roll terrain and retry.';
+          duelBannerEl.style.color = 'var(--accent-rose)';
+        }
+      }
+
+      requestAnimationFrame(duelGameLoop);
+    }
+
+    // Start Simulation
+    generateTerrain();
+    resetDuelMatch();
+    requestAnimationFrame(duelGameLoop);
   </script>
 </body>
 </html>
