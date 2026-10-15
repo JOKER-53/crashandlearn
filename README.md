@@ -5,7 +5,7 @@
 ![RL](https://img.shields.io/badge/Algorithm-PPO-orange?style=flat-square)
 [![CI Pipeline](https://github.com/JOKER-53/crashandlearn/actions/workflows/ci.yml/badge.svg)](https://github.com/JOKER-53/crashandlearn/actions/workflows/ci.yml)
 [![ONNX Runtime](https://img.shields.io/badge/Inference-ONNX%20WASM-005ced?style=flat-square&logo=webassembly)](https://onnxruntime.ai/)
-[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Hub%20Ready-yellow?style=flat-square)](https://huggingface.co/models?search=lunar-lander-v3)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Model%20Card-yellow?style=flat-square)](https://huggingface.co/JOKER53/lunar-lander-deep-ppo)
 [![Live Dashboard](https://img.shields.io/badge/Live-Research%20Showcase-00f0ff?style=flat-square&logo=googlechrome)](https://joker53.me/crashandlearn/)
 
 > Autonomous rocket guidance and reward shaping laboratory with Proximal Policy Optimization (PPO), deep residual neural networks, interactive human vs AI flight duels, and WebAssembly in-browser inference.
@@ -265,7 +265,7 @@ from stable_baselines3 import PPO
 import gymnasium as gym
 
 # Pull verified weights directly from Hugging Face Hub
-model_path = hf_hub_download(repo_id="username/lunar-lander-deep-ppo", filename="ppo_deep_discrete.zip")
+model_path = hf_hub_download(repo_id="JOKER53/lunar-lander-deep-ppo", filename="ppo_deep_discrete.zip")
 model = PPO.load(model_path)
 
 env = gym.make("LunarLander-v3", render_mode="human")

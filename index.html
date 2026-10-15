@@ -1002,7 +1002,7 @@
       </ul>
 
       <div class="nav-actions">
-        <a href="https://huggingface.co/models?search=lunar-lander-v3" target="_blank" class="btn-github" style="border-color: rgba(255, 215, 0, 0.4); color: #fde047; margin-right: 8px;">
+        <a href="https://huggingface.co/JOKER53/lunar-lander-deep-ppo" target="_blank" class="btn-github" style="border-color: rgba(255, 215, 0, 0.4); color: #fde047; margin-right: 8px;">
           🤗 Hugging Face
         </a>
         <a href="https://github.com/JOKER-53/crashandlearn" target="_blank" class="btn-github">
@@ -1751,15 +1751,15 @@
 
       hf: `<span class="c-comment"># 1. Publish trained checkpoint, ONNX model & Model Card to Hugging Face Hub</span>
 <span class="c-cmd">export HF_TOKEN="hf_your_token_here"</span>
-<span class="c-cmd">venv/bin/python scripts/push_to_hub.py --repo-id username/lunar-lander-deep-ppo --type model</span>
+<span class="c-cmd">venv/bin/python scripts/push_to_hub.py --repo-id JOKER53/lunar-lander-deep-ppo --type model</span>
 
 <span class="c-comment"># 2. Deploy interactive Web flight simulator as a Hugging Face Space</span>
-<span class="c-cmd">venv/bin/python scripts/push_to_hub.py --repo-id username/crashandlearn-arena --type space</span>
+<span class="c-cmd">venv/bin/python scripts/push_to_hub.py --repo-id JOKER53/crashandlearn-arena --type space</span>
 
 <span class="c-comment"># 3. Download & Run from Hugging Face Hub in Python (Stable-Baselines3)</span>
 <span class="c-cmd">from huggingface_hub import hf_hub_download</span>
 <span class="c-cmd">from stable_baselines3 import PPO</span>
-<span class="c-cmd">model = PPO.load(hf_hub_download(repo_id="username/lunar-lander-deep-ppo", filename="ppo_deep_discrete.zip"))</span>`
+<span class="c-cmd">model = PPO.load(hf_hub_download(repo_id="JOKER53/lunar-lander-deep-ppo", filename="ppo_deep_discrete.zip"))</span>`
     };
 
     let activeCliKey = 'play';
