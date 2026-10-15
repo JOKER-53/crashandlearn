@@ -104,7 +104,31 @@ python evaluate.py --model models/ppo_default --episodes 10 --record
 python evaluate.py --model models/ppo_deep_discrete --episodes 10 --record
 ```
 
-### 4. Trigger reward hacking
+### 🎮 4. Play Human vs AI (Interactive Split-Screen Race)
+
+Take the flight stick and race in real time against the trained PPO agent on identical terrain and initial altitude!
+
+```bash
+# Launch 50 FPS split-screen race against the Deep Guidance Agent
+python play.py --mode duel --model models/ppo_deep_discrete
+
+# Solo pilot practice with full aerospace HUD telemetry
+python play.py --mode solo
+
+# Challenge different model variants (e.g. race the hover exploit agent)
+python play.py --mode duel --model models/ppo_hack
+```
+
+**Controls:**
+- `[↑ / W]`: Fire Main Engine (Upward Thrust)
+- `[← / A]`: Fire Left Engine (Rotate Lander Right)
+- `[→ / D]`: Fire Right Engine (Rotate Lander Left)
+- `[R]`: Restart Match with New Random Seed
+- `[Q / ESC]`: Exit Duel
+
+*Or play directly in your web browser with zero installation on the [Live Web Dashboard](https://joker-53.github.io/crashandlearn/#duel-arena)!*
+
+### 5. Trigger reward hacking
 
 ```bash
 python train.py --reward-mode hack --timesteps 300000 --save-path models/ppo_hack
@@ -112,7 +136,7 @@ python evaluate.py --model models/ppo_hack --record
 # Agent will hover — never land
 ```
 
-### 5. Fix it
+### 6. Fix it
 
 ```bash
 python train.py --reward-mode fixed --timesteps 300000 --save-path models/ppo_fixed
@@ -164,6 +188,7 @@ class CustomRewardWrapper(gym.Wrapper):
 
 ```
 lunar-lander-rl/
+├── play.py               # Interactive Human vs AI split-screen flight duel
 ├── network.py            # High-Definition Deep Neural Guidance Network (ResMLP)
 ├── telemetry_hud.py      # Mission-control heads-up display telemetry renderer
 ├── random_agent.py       # Baseline random agent execution
