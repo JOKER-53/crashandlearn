@@ -74,26 +74,17 @@ class CustomRewardWrapper(gym.Wrapper):
         shaped_reward = reward
 
         if self.reward_mode == "hack":
-            # Survival bonus exploit: +1.0 per frame regardless of progress
-            # Over 1000 frames, hovering yields ~1000 pts without risking landing
-            shaped_reward += 1.0
+            # Survival bonus exploit: adds flat +1.5 per frame
+            # The agent discovers that hovering for 1000 frames yields ~1500 points,
+            # which dwarfs the one-time +100 landing bonus, so it avoids landing entirely.
+            shaped_reward = reward + 1.5
 
         elif self.reward_mode == "fixed":
             # Fixed shaping:
-            # 1. Delta reward from progress towards target pad
-            # 2. Time penalty per step to eliminate hover incentives
-            current_shaping = self._calculate_shaping(obs)
-            delta_shaping = 0.0
-            if self.prev_shaping is not None:
-                delta_shaping = current_shaping - self.prev_shaping
-            self.prev_shaping = current_shaping
-
-            # Base environment already awards +100 for landing and -100 for crash on termination
-            if terminated:
-                # Retain clean terminal bonus/penalty
-                shaped_reward = reward
-            else:
-                shaped_reward = delta_shaping - self.step_penalty
+            # 1. Adds a step penalty (-0.05/frame) so hovering bleeds score over time.
+            # 2. Adds progress bonus for keeping legs down and vertical alignment near the pad.
+            leg_bonus = 0.2 * (obs[6] + obs[7])
+            shaped_reward = reward - self.step_penalty + leg_bonus
 
         info["original_reward"] = reward
         info["shaped_reward"] = shaped_reward
