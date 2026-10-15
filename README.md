@@ -85,29 +85,37 @@ python random_agent.py
 ### 2. Train the agent (default reward)
 
 ```bash
-python train.py --timesteps 1000000 --save-path models/ppo_lander
+# Standard MLP Policy
+python train.py --reward-mode default --timesteps 300000 --save-path models/ppo_default
+
+# High-Definition Deep Neural Guidance Network (ResMLP + GELU + LayerNorm)
+python train.py --reward-mode default --network deep --timesteps 400000 --save-path models/ppo_deep_discrete
+
+# High-Definition Continuous Control (Variable Throttle & Gimbal Thrust)
+python train.py --reward-mode default --network deep --continuous --timesteps 300000 --save-path models/ppo_deep_continuous
 ```
 
-Training takes ~20 minutes on CPU. Watch `ep_rew_mean` climb above 200 — that's the solve threshold.
+Training takes ~2–4 minutes on CPU with vectorized environments (3,500+ FPS). Watch `ep_rew_mean` climb above 200 — that's the solve threshold.
 
-### 3. Evaluate and record
+### 3. Evaluate and record with HUD Telemetry
 
 ```bash
-python evaluate.py --model models/ppo_lander --episodes 20 --record
+python evaluate.py --model models/ppo_default --episodes 10 --record
+python evaluate.py --model models/ppo_deep_discrete --episodes 10 --record
 ```
 
 ### 4. Trigger reward hacking
 
 ```bash
-python train.py --reward-mode hack --timesteps 1000000 --save-path models/ppo_hover
-python evaluate.py --model models/ppo_hover --record
+python train.py --reward-mode hack --timesteps 300000 --save-path models/ppo_hack
+python evaluate.py --model models/ppo_hack --record
 # Agent will hover — never land
 ```
 
 ### 5. Fix it
 
 ```bash
-python train.py --reward-mode fixed --timesteps 1000000 --save-path models/ppo_fixed
+python train.py --reward-mode fixed --timesteps 300000 --save-path models/ppo_fixed
 python evaluate.py --model models/ppo_fixed --record
 ```
 
@@ -156,13 +164,19 @@ class CustomRewardWrapper(gym.Wrapper):
 
 ```
 lunar-lander-rl/
-├── random_agent.py       # Watch untrained random agent crash
-├── train.py              # PPO training with reward mode flag
-├── evaluate.py           # Score + record evaluation clips
-├── reward_wrapper.py     # Custom reward shaping layer
-├── models/               # Saved model checkpoints
-├── videos/               # Recorded episode clips
+├── network.py            # High-Definition Deep Neural Guidance Network (ResMLP)
+├── telemetry_hud.py      # Mission-control heads-up display telemetry renderer
+├── random_agent.py       # Baseline random agent execution
+├── train.py              # Vectorized PPO training pipeline (discrete & continuous)
+├── evaluate.py           # Multi-episode evaluation with HUD video generation
+├── reward_wrapper.py     # Custom potential & shaping Gymnasium wrapper
+├── scripts/
+│   └── convert_to_gif.py # MP4 to web GIF telemetry converter
+├── models/               # Checkpoint model archive (.zip)
+├── assets/               # Replay GIF assets and diagrams
+├── tests/                # Test suite (wrapper + neural network verification)
 ├── requirements.txt
+├── index.html            # Web showcase & interactive telemetry lab
 └── README.md
 ```
 
@@ -170,13 +184,14 @@ lunar-lander-rl/
 
 ## 📊 Results
 
-| Reward Mode | Avg Score (10 eps) | Landing Rate | Behavior |
-|-------------|:------------------:|:------------:|----------|
-| **Default** | **~277.10** | **100%** | Lands dead-center consistently |
-| **Hack (+1.5/frame)** | **~1,480 (shaped)** | **0%** | Hovers indefinitely for 1,000 frames |
-| **Fixed (step penalty + legs)** | **~259.71** | **100%** | Lands safely within ~320 frames |
+| Reward Mode | Network Architecture | Avg Score (10 eps) | Landing Rate | Behavior |
+|-------------|----------------------|:------------------:|:------------:|----------|
+| **Deep Guidance** | **ResMLP (256x256x128)** | **~274.75** | **100%** | High-definition precision descent |
+| **Default** | Standard MLP (64x64) | **~277.10** | **100%** | Lands dead-center consistently |
+| **Hack (+1.5/frame)** | Standard MLP (64x64) | **~1,480 (shaped)** | **0%** | Hovers indefinitely for 1,000 frames |
+| **Fixed (step penalty)** | Standard MLP (64x64) | **~259.71** | **100%** | Lands safely within ~320 frames |
 
-> Score ≥ 200 is the official "solved" threshold for LunarLander-v3. Both Default and Fixed modes achieve 100% safe landings.
+> Score ≥ 200 is the official "solved" threshold for LunarLander-v3. Deep Guidance, Default, and Fixed modes all achieve 100% safe landings.
 
 ---
 

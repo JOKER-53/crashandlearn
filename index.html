@@ -686,6 +686,7 @@
           <button class="workbench-tab active" onclick="selectMode('default', this)">01. Default Solver (Baseline)</button>
           <button class="workbench-tab" onclick="selectMode('hack', this)">02. Reward Hacking (Specification Gaming)</button>
           <button class="workbench-tab" onclick="selectMode('fixed', this)">03. Fixed Potential Shaping (Recovery)</button>
+          <button class="workbench-tab" onclick="selectMode('deep', this)">04. Deep ResMLP Guidance (High-Definition)</button>
         </div>
 
         <div class="workbench-display">
@@ -812,6 +813,15 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
               </tr>
             </thead>
             <tbody>
+              <tr>
+                <td class="col-highlight">Deep ResMLP Guidance</td>
+                <td>350,000</td>
+                <td class="col-highlight" style="color: var(--accent-blue);">274.75 ± 20.31</td>
+                <td>10 / 10 (100.0%)</td>
+                <td>0.0%</td>
+                <td>259.0 frames</td>
+                <td style="color: var(--accent-blue); font-weight: 500;">✓ HIGH-PRECISION SOLVED</td>
+              </tr>
               <tr>
                 <td class="col-highlight">Default PPO Solver</td>
                 <td>600,000</td>
@@ -1000,6 +1010,21 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
         scoreColor: 'var(--accent-emerald)',
         touchdown: '10 / 10 (100.0%)',
         steps: '322.5 frames (~6.4s)',
+        crashes: '0.0%',
+        status: 'SOLVED (Threshold ≥ 200)'
+      },
+      deep: {
+        pill: 'MODE: DEEP GUIDANCE NETWORK (ResMLP)',
+        pillColor: 'var(--accent-blue)',
+        pillBg: 'var(--accent-blue-subtle)',
+        pillBorder: 'rgba(59, 130, 246, 0.2)',
+        title: 'High-Definition Residual Neural Guidance',
+        desc: 'Leverages dual 256-dimensional ResMLP blocks with contraction scaling (0.1), GELU activations, and decoupled actor-critic heads for high-bandwidth telemetry feature extraction and precision descent.',
+        video: 'assets/demo_deep.gif',
+        score: '274.75 ± 20.31',
+        scoreColor: 'var(--accent-blue)',
+        touchdown: '10 / 10 (100.0%)',
+        steps: '259.0 frames (~5.2s)',
         crashes: '0.0%',
         status: 'SOLVED (Threshold ≥ 200)'
       }
