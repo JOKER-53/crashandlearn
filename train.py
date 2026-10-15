@@ -55,6 +55,18 @@ def parse_args() -> argparse.Namespace:
         help="Random seed for reproducibility (default: 42).",
     )
     parser.add_argument(
+        "--network",
+        type=str,
+        default="deep",
+        choices=["deep", "standard"],
+        help="Neural network architecture ('deep': ResMLP + LayerNorm + GELU, 'standard': default SB3 MLP).",
+    )
+    parser.add_argument(
+        "--continuous",
+        action="store_true",
+        help="Enable continuous action space (variable throttle and gimbal control).",
+    )
+    parser.add_argument(
         "--tensorboard-log",
         type=str,
         default="./runs",
@@ -78,16 +90,17 @@ def train(args: argparse.Namespace) -> None:
     print("           LUNAR LANDER PPO TRAINING              ")
     print("==================================================")
     print(f" Reward Mode    : {reward_mode}")
+    print(f" Control Mode   : {'CONTINUOUS (Variable Thrust)' if args.continuous else 'DISCRETE'}")
+    print(f" Neural Network : {'Deep ResMLP (LayerNorm + GELU)' if args.network == 'deep' else 'Standard MLP'}")
     print(f" Total Timesteps: {args.timesteps:,}")
     print(f" Random Seed    : {args.seed}")
     print(f" Learning Rate  : {args.learning_rate}")
     print(f" Checkpoint Path: {save_path}.zip")
-    print(f" Tensorboard Log: {args.tensorboard_log}")
     print("==================================================")
 
     def make_single_env(rank: int):
         def _init():
-            env = make_lunar_lander_env(reward_mode=reward_mode)
+            env = make_lunar_lander_env(reward_mode=reward_mode, continuous=args.continuous)
             env.reset(seed=args.seed + rank if args.seed is not None else None)
             return Monitor(env)
         return _init
@@ -103,10 +116,17 @@ def train(args: argparse.Namespace) -> None:
         print("[!] Note: tensorboard not installed. Disabling TensorBoard logging.")
         tb_log = None
 
+    # Configure deep neural network policy kwargs
+    policy_kwargs = None
+    if args.network == "deep":
+        from network import get_deep_policy_kwargs
+        policy_kwargs = get_deep_policy_kwargs()
+
     # RL Zoo optimized PPO hyperparameters for LunarLander
     model = PPO(
         policy="MlpPolicy",
         env=vec_env,
+        policy_kwargs=policy_kwargs,
         learning_rate=args.learning_rate,
         n_steps=1024,
         batch_size=64,

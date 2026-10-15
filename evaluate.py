@@ -88,8 +88,10 @@ def evaluate_agent(
     print(f"[*] Loading PPO model from: {model_path}")
     model = PPO.load(model_path)
 
+    is_continuous = isinstance(model.action_space, gym.spaces.Box)
+    print(f"[*] Action Space Detected: {'CONTINUOUS (Variable Thrust)' if is_continuous else 'DISCRETE'}")
     render_mode = "rgb_array" if record else None
-    env = make_lunar_lander_env(reward_mode=reward_mode, render_mode=render_mode)
+    env = make_lunar_lander_env(reward_mode=reward_mode, render_mode=render_mode, continuous=is_continuous)
 
     hud = None
     if record:
