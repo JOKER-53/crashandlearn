@@ -97,11 +97,13 @@ def make_lunar_lander_env(
     reward_mode: str = "default",
     render_mode: Optional[str] = None,
     step_penalty: float = 0.05,
+    continuous: bool = False,
 ) -> gym.Env:
     """
     Factory helper to create a configured LunarLander-v3 environment.
+    Supports both discrete and high-definition continuous control.
     """
-    env = gym.make("LunarLander-v3", render_mode=render_mode)
+    env = gym.make("LunarLander-v3", render_mode=render_mode, continuous=continuous)
     if reward_mode != "default":
         env = CustomRewardWrapper(
             env, reward_mode=reward_mode, step_penalty=step_penalty
