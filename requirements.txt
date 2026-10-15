@@ -10,3 +10,4 @@ rich>=13.0.0
 pytest>=8.0.0
 onnx>=1.15.0
 matplotlib>=3.7.0
+huggingface-hub>=0.20.0

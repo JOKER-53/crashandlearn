@@ -5,6 +5,7 @@
 ![RL](https://img.shields.io/badge/Algorithm-PPO-orange?style=flat-square)
 [![CI Pipeline](https://github.com/JOKER-53/crashandlearn/actions/workflows/ci.yml/badge.svg)](https://github.com/JOKER-53/crashandlearn/actions/workflows/ci.yml)
 [![ONNX Runtime](https://img.shields.io/badge/Inference-ONNX%20WASM-005ced?style=flat-square&logo=webassembly)](https://onnxruntime.ai/)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Hub%20Ready-yellow?style=flat-square)](https://huggingface.co/models?search=lunar-lander-v3)
 [![Live Dashboard](https://img.shields.io/badge/Live-Research%20Showcase-00f0ff?style=flat-square&logo=googlechrome)](https://joker53.me/crashandlearn/)
 
 > Autonomous rocket guidance and reward shaping laboratory with Proximal Policy Optimization (PPO), deep residual neural networks, interactive human vs AI flight duels, and WebAssembly in-browser inference.
@@ -181,6 +182,7 @@ crashandlearn/
 ├── evaluate.py              # Multi-episode evaluation with HUD video generation
 ├── reward_wrapper.py        # Potential-based shaping Gymnasium wrapper
 ├── scripts/
+│   ├── push_to_hub.py       # Automated Hugging Face Model Hub & Space publisher
 │   ├── export_onnx.py       # PyTorch Actor Policy to ONNX converter
 │   ├── plot_training_curves.py # Publication-grade multi-panel convergence plotter
 │   └── convert_to_gif.py    # MP4 to web GIF telemetry converter
@@ -189,7 +191,7 @@ crashandlearn/
 │   ├── ppo_policy.onnx      # Self-contained ONNX WebAssembly policy (398 KB)
 │   ├── learning_curves.png  # Multi-metric empirical training convergence
 │   └── demo_*.gif           # Web flight recordings
-├── tests/                   # Pytest test suite (15 unit tests)
+├── tests/                   # Pytest test suite (18 unit tests)
 ├── requirements.txt
 ├── index.html               # Elite research showcase & in-browser flight arena
 └── README.md
@@ -236,6 +238,47 @@ python scripts/export_onnx.py --model models/ppo_deep_discrete.zip --output asse
 ```
 
 The resulting 398 KB model is evaluated in real-time inside client browsers via `onnxruntime-web`, driving the interactive flight duel on the live website.
+
+---
+
+## 🤗 Hugging Face Hub Integration
+
+Deploy, share, and evaluate models directly on the Hugging Face Model Hub and Hugging Face Spaces:
+
+```bash
+# 1. Publish checkpoint, ONNX runtime, and Model Card to Hugging Face
+export HF_TOKEN="hf_your_token_here"
+python scripts/push_to_hub.py --repo-id username/lunar-lander-deep-ppo --type model
+
+# 2. Deploy interactive in-browser simulator as a Hugging Face Space
+python scripts/push_to_hub.py --repo-id username/crashandlearn-arena --type space
+
+# 3. Dry-run locally without connecting to network
+python scripts/push_to_hub.py --repo-id username/lunar-lander-deep-ppo --dry-run
+```
+
+### Download & Run from Hugging Face Hub in 3 lines of Python
+
+```python
+from huggingface_hub import hf_hub_download
+from stable_baselines3 import PPO
+import gymnasium as gym
+
+# Pull verified weights directly from Hugging Face Hub
+model_path = hf_hub_download(repo_id="username/lunar-lander-deep-ppo", filename="ppo_deep_discrete.zip")
+model = PPO.load(model_path)
+
+env = gym.make("LunarLander-v3", render_mode="human")
+obs, _ = env.reset(seed=42)
+done = False
+
+while not done:
+    action, _ = model.predict(obs, deterministic=True)
+    obs, reward, terminated, truncated, _ = env.step(action)
+    done = terminated or truncated
+
+env.close()
+```
 
 ---
 
