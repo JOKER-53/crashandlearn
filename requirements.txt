@@ -8,3 +8,5 @@ numpy>=1.24.0
 tensorboard>=2.14.0
 rich>=13.0.0
 pytest>=8.0.0
+onnx>=1.15.0
+matplotlib>=3.7.0
