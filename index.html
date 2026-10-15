@@ -3,32 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Specification Gaming & Reward Shaping in Lunar Lander — PPO Case Study</title>
-  <meta name="description" content="An empirical study of reward shaping, specification gaming, and policy alignment using Proximal Policy Optimization (PPO) in Gymnasium LunarLander-v3.">
+  <title>Autonomous Rocket Landing & Reward Shaping — PPO Empirical Research</title>
+  <meta name="description" content="An empirical investigation of potential-based reward shaping, specification gaming, and deep residual neural guidance in Gymnasium LunarLander-v3.">
+  <meta property="og:title" content="Autonomous Rocket Landing & Reward Shaping — PPO Research">
+  <meta property="og:description" content="Empirical analysis of reward hacking loopholes, potential-based shaping, and deep neural guidance with playable Human vs AI flight duel.">
+  <meta property="og:type" content="website">
+
+  <!-- Google Fonts: Plus Jakarta Sans (Display), Inter (Body), JetBrains Mono (Code) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- KaTeX for Publication-Grade LaTeX Math Notation -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
+
   <style>
     :root {
-      --bg-base: #090a0f;
-      --bg-subtle: #0f1118;
-      --bg-surface: #141822;
-      --bg-surface-elevated: #1a1f2c;
-      --border-subtle: rgba(255, 255, 255, 0.08);
-      --border-strong: rgba(255, 255, 255, 0.16);
-      --border-focus: rgba(96, 165, 250, 0.4);
+      --bg-canvas: #06080e;
+      --bg-subtle: #0b0f19;
+      --bg-surface: #101624;
+      --bg-card: #151d30;
+      --bg-elevated: #1b253d;
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-light: rgba(255, 255, 255, 0.12);
+      --border-strong: rgba(255, 255, 255, 0.18);
+      --border-glow: rgba(56, 189, 248, 0.35);
+
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
+
+      --accent-cyan: #00e5ff;
+      --accent-cyan-subtle: rgba(0, 229, 255, 0.12);
       --accent-blue: #3b82f6;
       --accent-blue-subtle: rgba(59, 130, 246, 0.12);
+      --accent-purple: #a855f7;
+      --accent-purple-subtle: rgba(168, 85, 247, 0.12);
       --accent-emerald: #10b981;
       --accent-emerald-subtle: rgba(16, 185, 129, 0.12);
       --accent-amber: #f59e0b;
       --accent-amber-subtle: rgba(245, 158, 11, 0.12);
       --accent-rose: #f43f5e;
+      --accent-rose-subtle: rgba(244, 63, 94, 0.12);
+
+      --font-display: 'Plus Jakarta Sans', var(--font-sans);
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
     }
 
     * {
@@ -37,8 +64,15 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
-      background-color: var(--bg-base);
+      background-color: var(--bg-canvas);
+      background-image: 
+        radial-gradient(1200px circle at 50% -120px, rgba(59, 130, 246, 0.10), transparent 70%),
+        radial-gradient(800px circle at 100% 30%, rgba(168, 85, 247, 0.05), transparent 60%);
       color: var(--text-primary);
       font-family: var(--font-sans);
       font-size: 15px;
@@ -48,49 +82,62 @@
     }
 
     .container {
-      max-width: 1140px;
+      max-width: 1180px;
       margin: 0 auto;
       padding: 0 32px;
     }
 
-    /* Top Navigation Bar */
+    /* Top Navigation Header */
     header.site-header {
       position: sticky;
       top: 0;
-      z-index: 50;
-      background: rgba(9, 10, 15, 0.85);
-      backdrop-filter: blur(16px);
+      z-index: 100;
+      background: rgba(6, 8, 14, 0.82);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-subtle);
     }
     .header-inner {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      height: 64px;
+      height: 68px;
     }
-    .brand-title {
+    .brand-mark {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       text-decoration: none;
       color: var(--text-primary);
-      font-weight: 600;
-      font-size: 0.95rem;
-      letter-spacing: -0.01em;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #0284c7, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 16px rgba(59, 130, 246, 0.4);
     }
     .brand-tag {
       font-size: 0.72rem;
       font-family: var(--font-mono);
+      font-weight: 600;
       background: var(--bg-surface);
-      color: var(--text-secondary);
-      padding: 2px 7px;
+      color: var(--accent-cyan);
+      padding: 2px 8px;
       border-radius: 4px;
-      border: 1px solid var(--border-subtle);
+      border: 1px solid rgba(0, 229, 255, 0.25);
     }
     .nav-menu {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 28px;
       list-style: none;
     }
     .nav-menu a {
@@ -103,128 +150,227 @@
     .nav-menu a:hover {
       color: var(--text-primary);
     }
+    .nav-menu a.highlight-nav {
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
     .nav-actions {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-    .btn-outline {
+    .btn-github {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 6px 14px;
-      border-radius: 6px;
-      border: 1px solid var(--border-subtle);
-      background: var(--bg-subtle);
-      color: var(--text-secondary);
-      font-size: 0.85rem;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.15s ease;
-    }
-    .btn-outline:hover {
-      color: var(--text-primary);
-      border-color: var(--border-strong);
+      padding: 7px 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
       background: var(--bg-surface);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.18s ease;
+    }
+    .btn-github:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-elevated);
+      box-shadow: 0 0 18px rgba(255, 255, 255, 0.06);
     }
 
     /* Paper Hero Section */
     .hero-section {
-      padding: 80px 0 56px;
+      padding: 76px 0 54px;
       border-bottom: 1px solid var(--border-subtle);
+      position: relative;
     }
-    .paper-meta {
+    .hero-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-emerald);
+      background: var(--accent-emerald-subtle);
+      padding: 4px 11px;
+      border-radius: 9999px;
+      border: 1px solid rgba(16, 185, 129, 0.28);
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-emerald);
+      box-shadow: 0 0 8px var(--accent-emerald);
+      animation: pulseDot 2s infinite;
+    }
+    @keyframes pulseDot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+    .meta-tag {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.16;
+      margin-bottom: 20px;
+      max-width: 980px;
+      background: linear-gradient(180deg, #ffffff 40%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    @media (max-width: 860px) {
+      .hero-title { font-size: 2.2rem; }
+    }
+
+    .hero-authors {
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-bottom: 20px;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
       flex-wrap: wrap;
     }
-    .meta-badge {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--accent-blue);
-      background: var(--accent-blue-subtle);
-      padding: 3px 9px;
-      border-radius: 4px;
-      border: 1px solid rgba(59, 130, 246, 0.2);
-    }
-    .meta-date {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-    }
-    .paper-title {
-      font-size: 2.75rem;
-      font-weight: 700;
-      letter-spacing: -0.035em;
-      line-height: 1.2;
+    .hero-author-name {
       color: var(--text-primary);
-      margin-bottom: 24px;
-      max-width: 960px;
+      font-weight: 600;
     }
-    .paper-authors {
+    .hero-abstract {
+      font-size: 1.08rem;
+      line-height: 1.75;
+      color: var(--text-secondary);
+      max-width: 880px;
+      margin-bottom: 36px;
+      padding-left: 20px;
+      border-left: 2px solid var(--accent-blue);
+    }
+
+    .hero-actions {
       display: flex;
       align-items: center;
       gap: 16px;
-      font-size: 0.95rem;
-      color: var(--text-secondary);
-      margin-bottom: 32px;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
     }
-    .author-name {
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      padding: 12px 24px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 0.92rem;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.35);
+      transition: all 0.18s ease;
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(37, 99, 235, 0.5);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-surface);
+      color: var(--text-secondary);
+      padding: 12px 22px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-weight: 600;
+      font-size: 0.92rem;
+      text-decoration: none;
+      border: 1px solid var(--border-light);
+      transition: all 0.18s ease;
+    }
+    .btn-secondary:hover {
       color: var(--text-primary);
-      font-weight: 500;
-    }
-    .paper-abstract {
-      font-size: 1.05rem;
-      line-height: 1.7;
-      color: var(--text-secondary);
-      max-width: 860px;
-      margin-bottom: 40px;
-      padding-left: 20px;
-      border-left: 2px solid var(--border-strong);
-    }
-
-    /* Primary Stats Grid */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-top: 40px;
-    }
-    @media (max-width: 860px) {
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
-    }
-    .stat-box {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 20px;
-      transition: border-color 0.15s ease;
-    }
-    .stat-box:hover {
+      background: var(--bg-card);
       border-color: var(--border-strong);
     }
-    .stat-num {
-      font-family: var(--font-mono);
-      font-size: 1.85rem;
-      font-weight: 600;
-      letter-spacing: -0.03em;
-      margin-bottom: 4px;
+
+    /* Executive Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
     }
-    .stat-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    @media (max-width: 900px) {
+      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .metrics-grid { grid-template-columns: 1fr; }
+    }
+    .metric-card {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-top: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 22px 24px;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .metric-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .metric-num {
+      font-family: var(--font-mono);
+      font-size: 2.1rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .metric-sub {
+      font-size: 0.75rem;
       font-weight: 500;
+      color: var(--text-muted);
+    }
+    .metric-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .metric-tagline {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
     }
 
-    /* Section Structure */
+    /* Section Wrapper */
     section.report-section {
-      padding: 72px 0;
+      padding: 80px 0;
       border-bottom: 1px solid var(--border-subtle);
     }
     .section-heading-group {
@@ -234,31 +380,35 @@
       font-family: var(--font-mono);
       font-size: 0.78rem;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--accent-blue);
-      margin-bottom: 8px;
-      display: block;
-    }
-    .section-title-large {
-      font-size: 1.85rem;
+      letter-spacing: 0.1em;
+      color: var(--accent-cyan);
+      margin-bottom: 10px;
+      display: inline-block;
       font-weight: 600;
-      letter-spacing: -0.025em;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
       color: var(--text-primary);
       margin-bottom: 12px;
     }
     .section-lead {
       color: var(--text-secondary);
-      font-size: 1rem;
-      max-width: 760px;
-      line-height: 1.6;
+      font-size: 1.02rem;
+      max-width: 820px;
+      line-height: 1.65;
     }
 
-    /* Visual Flight Workbench (Tabs & Media) */
+    /* Visual Flight Workbench */
     .workbench-tabs {
       display: flex;
       gap: 8px;
       border-bottom: 1px solid var(--border-subtle);
       margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 2px;
     }
     .workbench-tab {
       background: transparent;
@@ -270,6 +420,7 @@
       color: var(--text-muted);
       cursor: pointer;
       position: relative;
+      white-space: nowrap;
       transition: color 0.15s ease;
     }
     .workbench-tab:hover {
@@ -282,11 +433,13 @@
     .workbench-tab.active::after {
       content: '';
       position: absolute;
-      bottom: -1px;
+      bottom: -3px;
       left: 0;
       right: 0;
-      height: 2px;
+      height: 3px;
       background: var(--accent-blue);
+      border-radius: 2px;
+      box-shadow: 0 0 10px var(--accent-blue);
     }
 
     .workbench-display {
@@ -295,29 +448,47 @@
       gap: 28px;
       background: var(--bg-subtle);
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
+      border-top: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
       overflow: hidden;
       padding: 24px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
     }
-    @media (max-width: 900px) {
+    @media (max-width: 920px) {
       .workbench-display { grid-template-columns: 1fr; }
     }
 
     .viewport-container {
       background: #000;
-      border-radius: 8px;
+      border-radius: var(--radius-md);
       overflow: hidden;
       border: 1px solid var(--border-subtle);
       aspect-ratio: 608 / 400;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
     .viewport-container img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+    .viewport-overlay-tag {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+      letter-spacing: 0.05em;
     }
 
     .telemetry-dashboard {
@@ -326,310 +497,94 @@
       justify-content: space-between;
     }
     .telemetry-header {
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
     .mode-pill {
       display: inline-block;
       font-family: var(--font-mono);
       font-size: 0.75rem;
-      font-weight: 600;
-      padding: 3px 8px;
+      font-weight: 700;
+      padding: 4px 10px;
       border-radius: 4px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      letter-spacing: 0.04em;
     }
     .telemetry-title {
-      font-size: 1.25rem;
-      font-weight: 600;
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
       color: var(--text-primary);
       margin-bottom: 8px;
+      letter-spacing: -0.02em;
     }
     .telemetry-description {
       font-size: 0.92rem;
       color: var(--text-secondary);
-      line-height: 1.6;
+      line-height: 1.65;
     }
 
     .spec-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.88rem;
-      margin-top: 20px;
-    }
-    .spec-table tr {
-      border-top: 1px solid var(--border-subtle);
+      font-size: 0.86rem;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
     }
     .spec-table td {
-      padding: 10px 0;
-    }
-    .spec-table td:first-child {
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-    }
-    .spec-table td:last-child {
-      text-align: right;
-      color: var(--text-primary);
-      font-family: var(--font-mono);
-      font-weight: 500;
-    }
-
-    /* Mathematical Formulation Section */
-    .math-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-    @media (max-width: 900px) {
-      .math-grid { grid-template-columns: 1fr; }
-    }
-    .math-card {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 24px;
-    }
-    .math-card-title {
-      font-size: 0.95rem;
-      font-weight: 600;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .math-formula {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 14px;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      color: var(--text-primary);
-      margin-bottom: 16px;
-      overflow-x: auto;
-    }
-    .math-explanation {
-      font-size: 0.88rem;
-      color: var(--text-secondary);
-      line-height: 1.55;
-    }
-
-    /* Benchmark Table */
-    .benchmark-table-wrapper {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    .benchmark-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 0.9rem;
-    }
-    .benchmark-table th {
-      background: var(--bg-surface);
-      padding: 14px 20px;
-      font-size: 0.78rem;
-      font-family: var(--font-mono);
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border-subtle);
     }
-    .benchmark-table td {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-    }
-    .benchmark-table tr:last-child td {
+    .spec-table tr:last-child td {
       border-bottom: none;
     }
-    .benchmark-table td.col-highlight {
-      color: var(--text-primary);
+    .spec-table td:first-child {
       font-family: var(--font-mono);
-      font-weight: 600;
-    }
-
-    /* Interactive Simulator */
-    .simulator-container {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border-subtle);
-      border-radius: 12px;
-      padding: 32px;
-    }
-    .sim-layout {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 36px;
-      align-items: center;
-    }
-    @media (max-width: 860px) {
-      .sim-layout { grid-template-columns: 1fr; }
-    }
-    .control-row {
-      margin-bottom: 22px;
-    }
-    .control-label-bar {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.88rem;
-      font-weight: 500;
-      margin-bottom: 8px;
-    }
-    .control-val {
-      font-family: var(--font-mono);
-      color: var(--accent-blue);
-      font-weight: 600;
-    }
-    .range-input {
-      width: 100%;
-      height: 4px;
-      border-radius: 2px;
-      background: var(--bg-surface-elevated);
-      outline: none;
-      -webkit-appearance: none;
-    }
-    .range-input::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: var(--text-primary);
-      cursor: pointer;
-      border: 2px solid var(--accent-blue);
-    }
-
-    .prediction-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 24px;
-    }
-    .prediction-tag {
-      font-family: var(--font-mono);
-      font-size: 0.72rem;
       color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
-    }
-    .prediction-title {
-      font-size: 1.3rem;
+      font-size: 0.78rem;
       font-weight: 600;
-      margin-bottom: 10px;
+      letter-spacing: 0.03em;
     }
-    .prediction-body {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      line-height: 1.6;
-    }
-
-    /* Terminal Code Panel */
-    .cli-panel {
-      background: #0d1017;
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      overflow: hidden;
+    .spec-table td:last-child {
       font-family: var(--font-mono);
-    }
-    .cli-header {
-      background: #141824;
-      padding: 10px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .cli-dots {
-      display: flex;
-      gap: 6px;
-    }
-    .cli-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.15);
-    }
-    .cli-tabs {
-      display: flex;
-      gap: 6px;
-    }
-    .cli-tab-btn {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      padding: 4px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .cli-tab-btn.active {
-      background: rgba(255, 255, 255, 0.08);
       color: var(--text-primary);
-    }
-    .cli-code {
-      padding: 20px;
-      font-size: 0.86rem;
-      line-height: 1.65;
-      color: #94a3b8;
-      overflow-x: auto;
-    }
-    .c-cmd { color: var(--text-primary); }
-    .c-comment { color: #475569; }
-
-    /* Footer */
-    footer.site-footer {
-      padding: 48px 0;
-      border-top: 1px solid var(--border-subtle);
-      font-size: 0.88rem;
-      color: var(--text-muted);
-    }
-    .footer-inner {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .footer-inner a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: color 0.15s ease;
-    }
-    .footer-inner a:hover {
-      color: var(--text-primary);
+      font-weight: 600;
+      text-align: right;
     }
 
-    /* Duel Arena Styles */
+    /* ========================================================
+       DUEL ARENA (HUMAN VS AI PLAYABLE FLIGHT DECK)
+       ======================================================== */
     .duel-arena-wrapper {
-      background: #090d16;
+      background: #090c14;
       border: 1px solid var(--border-subtle);
-      border-radius: 12px;
+      border-top: 1px solid var(--border-light);
+      border-radius: var(--radius-xl);
       overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55);
     }
     .duel-topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;
+      padding: 16px 24px;
       background: var(--bg-surface);
       border-bottom: 1px solid var(--border-subtle);
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 14px;
     }
     .duel-score-badge {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       font-family: var(--font-mono);
       font-size: 0.88rem;
     }
     .duel-canvas-container {
       position: relative;
       width: 100%;
-      background: #05070d;
+      background: #04060a;
       display: flex;
       justify-content: center;
     }
@@ -643,11 +598,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 14px 20px;
+      padding: 16px 24px;
       background: var(--bg-surface);
       border-top: 1px solid var(--border-subtle);
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 14px;
     }
     .duel-btn-group {
       display: flex;
@@ -655,52 +610,396 @@
       flex-wrap: wrap;
     }
     .duel-btn {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
       color: var(--text-primary);
       font-family: var(--font-mono);
-      font-size: 0.82rem;
-      padding: 8px 14px;
-      border-radius: 6px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
       cursor: pointer;
       user-select: none;
       transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
     .duel-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--accent-blue);
+      background: var(--bg-elevated);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
     }
     .duel-btn:active, .duel-btn.active {
-      background: rgba(59, 130, 246, 0.25);
-      border-color: var(--accent-blue);
+      background: rgba(0, 229, 255, 0.2);
+      border-color: var(--accent-cyan);
       color: #fff;
+      transform: scale(0.97);
     }
-    .duel-desktop-tip {
+    .duel-btn.btn-thrust {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(30, 64, 175, 0.3));
+      border-color: rgba(59, 130, 246, 0.5);
+      color: #93c5fd;
+    }
+    .duel-btn.btn-thrust:hover, .duel-btn.btn-thrust.active {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 0 16px rgba(59, 130, 246, 0.4);
+    }
+
+    .key-indicators {
+      display: flex;
+      align-items: center;
+      gap: 16px;
       font-family: var(--font-mono);
       font-size: 0.8rem;
       color: var(--text-muted);
+    }
+    .key-pill {
+      display: inline-block;
+      padding: 2px 7px;
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .key-pill.lit {
+      background: var(--accent-cyan);
+      color: #000;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 8px var(--accent-cyan);
+    }
+
+    /* Math Grid */
+    .math-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 960px) {
+      .math-grid { grid-template-columns: 1fr; }
+    }
+    .math-card {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-top: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .math-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .math-card-title {
+      font-family: var(--font-display);
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    .math-box {
+      background: #04060a;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      color: #38bdf8;
+      margin-bottom: 16px;
+      text-align: center;
+      overflow-x: auto;
+    }
+    .math-explanation {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    /* Benchmark Table */
+    .benchmark-table-wrapper {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow-x: auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .benchmark-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    .benchmark-table th {
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .benchmark-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+    .benchmark-table tr:last-child td {
+      border-bottom: none;
+    }
+    .benchmark-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .badge-solved {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--accent-emerald);
+      background: var(--accent-emerald-subtle);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .badge-exploit {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--accent-amber);
+      background: var(--accent-amber-subtle);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .badge-crash {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: var(--accent-rose);
+      background: var(--accent-rose-subtle);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    /* Interactive Simulator */
+    .simulator-container {
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+    }
+    .sim-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 36px;
+      align-items: center;
+    }
+    @media (max-width: 860px) {
+      .sim-layout { grid-template-columns: 1fr; }
+    }
+    .control-row {
+      margin-bottom: 24px;
+    }
+    .control-label-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+    .control-val {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-cyan);
+    }
+    .range-input {
+      width: 100%;
+      accent-color: var(--accent-blue);
+      cursor: pointer;
+    }
+    .prediction-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 26px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .prediction-tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .prediction-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .prediction-body {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    /* CLI Terminal */
+    .cli-panel {
+      background: #080a11;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      font-family: var(--font-mono);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    }
+    .cli-header {
+      background: #0e121d;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .cli-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .cli-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .cli-tabs {
+      display: flex;
+      gap: 6px;
+    }
+    .cli-tab-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .cli-tab-btn:hover {
+      color: var(--text-secondary);
+    }
+    .cli-tab-btn.active {
+      background: var(--bg-surface);
+      border-color: var(--border-light);
+      color: var(--text-primary);
+    }
+    .cli-code-wrapper {
+      position: relative;
+    }
+    .cli-code {
+      padding: 24px;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: #94a3b8;
+      overflow-x: auto;
+    }
+    .c-cmd { color: #f1f5f9; font-weight: 600; }
+    .c-comment { color: #475569; }
+    .btn-copy-code {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn-copy-code:hover {
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    /* Footer */
+    footer.site-footer {
+      padding: 56px 0;
+      border-top: 1px solid var(--border-subtle);
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      background: var(--bg-canvas);
+    }
+    .footer-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .footer-inner a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .footer-inner a:hover {
+      color: var(--text-primary);
     }
   </style>
 </head>
 <body>
 
-  <!-- Site Navigation -->
+  <!-- Top Sticky Header -->
   <header class="site-header">
     <div class="container header-inner">
-      <a href="#" class="brand-title">
-        LunarLander-PPO
-        <span class="brand-tag">v3.0.0</span>
+      <a href="#" class="brand-mark">
+        <div class="brand-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><polygon points="12 2 19 21 12 17 5 21 12 2"/></svg>
+        </div>
+        <span>LunarLander-PPO</span>
+        <span class="brand-tag">v1.6.0</span>
       </a>
+
       <ul class="nav-menu">
-        <li><a href="#workbench">Flight Telemetry</a></li>
-        <li><a href="#duel-arena" style="color: var(--accent-cyan); font-weight: 600;">🎮 Play: Human vs AI</a></li>
+        <li><a href="#workbench">Telemetry Deck</a></li>
+        <li><a href="#duel-arena" class="highlight-nav">🎮 Play: Human vs AI</a></li>
         <li><a href="#math">Reward Formulation</a></li>
-        <li><a href="#benchmarks">Benchmark Results</a></li>
-        <li><a href="#simulator">Incentive Simulator</a></li>
-        <li><a href="#quickstart">Code & CLI</a></li>
+        <li><a href="#benchmarks">Benchmark Matrix</a></li>
+        <li><a href="#simulator">Incentive Sandbox</a></li>
+        <li><a href="#quickstart">CLI Execution</a></li>
       </ul>
+
       <div class="nav-actions">
-        <a href="https://github.com/JOKER-53/crashandlearn" target="_blank" class="btn-outline">
+        <a href="https://github.com/JOKER-53/crashandlearn" target="_blank" class="btn-github">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
           Source Code
         </a>
@@ -708,75 +1007,113 @@
     </div>
   </header>
 
-  <!-- Paper Hero Header -->
   <main>
+    <!-- Paper Hero Section -->
     <section class="hero-section">
       <div class="container">
-        <div class="paper-meta">
-          <span class="meta-badge">Empirical Research Case Study</span>
-          <span class="meta-date">Environment: Gymnasium LunarLander-v3</span>
-          <span class="meta-date">Framework: Stable-Baselines3 (PPO)</span>
+        <div class="hero-badge-row">
+          <div class="status-pill">
+            <span class="status-dot"></span>
+            Empirical RL Research · Release v1.6.0
+          </div>
+          <span class="meta-tag">Environment: Gymnasium LunarLander-v3</span>
+          <span class="meta-tag">Algorithm: PPO (Clipped Surrogate)</span>
         </div>
 
-        <h1 class="paper-title">
-          Specification Gaming & Reward Shaping in Continuous Control: An Empirical Analysis
+        <h1 class="hero-title">
+          Precision Autonomous Rocket Landing via Residual Reinforcement Learning
         </h1>
 
-        <div class="paper-authors">
-          <span class="author-name">Kadhir</span> • <span>Open Source Research Repository</span>
+        <div class="hero-authors">
+          <span>Lead Researcher: <strong class="hero-author-name">Kadhiravan E. G.</strong></span>
+          <span>•</span>
+          <span>Repository: <a href="https://github.com/JOKER-53/crashandlearn" target="_blank" style="color: var(--accent-cyan); text-decoration: none;">github.com/JOKER-53/crashandlearn</a></span>
+          <span>•</span>
+          <span>License: MIT (Open Access)</span>
         </div>
 
-        <p class="paper-abstract">
-          <strong>Abstract:</strong> Reinforcement learning agents optimize exclusively for the scalar reward signal provided by the environment designer, frequently uncovering degenerate local optima known as <em>specification gaming</em> or <em>reward hacking</em>. In this work, we train Proximal Policy Optimization (PPO) agents on the standard LunarLander-v3 benchmark to study reward hacking in practice. We demonstrate that introducing an intuitive survival incentive (<code>+1.5/step</code>) induces an exploitation loophole where the agent learns to hover indefinitely rather than risk touchdown. We subsequently derive and verify a cost-penalized potential-based shaping function that eliminates the exploit and restores a 100% safe touchdown rate.
+        <p class="hero-abstract">
+          We investigate policy alignment, specification gaming vulnerabilities, and deep neural guidance architectures in autonomous spacecraft descent. When an intuitive survival bonus is added, the policy discovers a specification loophole—hovering indefinitely for 1,000 frames to game accumulated rewards. We prove how potential-based reward shaping ($Ng\text{ et al.}$) restores alignment, achieving <strong>100% precision touchdown</strong> with decoupled Actor-Critic deep residual networks.
         </p>
 
-        <!-- Key Metrics Row -->
-        <div class="stats-row">
-          <div class="stat-box">
-            <div class="stat-num" style="color: var(--accent-emerald);">277.10</div>
-            <div class="stat-label">Default Solver Score (μ)</div>
+        <div class="hero-actions">
+          <a href="#duel-arena" class="btn-primary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Play Live Human vs AI Duel
+          </a>
+          <a href="#workbench" class="btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            Flight Telemetry Workbench
+          </a>
+          <a href="#benchmarks" class="btn-secondary">
+            Benchmark Matrix
+          </a>
+        </div>
+
+        <!-- 4 Metric Highlight Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-label">Mean Solved Score</div>
+            <div class="metric-num" style="color: var(--accent-emerald);">
+              277.10 <span class="metric-sub">± 19.9</span>
+            </div>
+            <div class="metric-tagline">Official threshold ≥ 200 pts passed on all seeds</div>
           </div>
-          <div class="stat-box">
-            <div class="stat-num" style="color: var(--accent-emerald);">100.0%</div>
-            <div class="stat-label">Touchdown Success Rate</div>
+
+          <div class="metric-card">
+            <div class="metric-label">Touchdown Success Rate</div>
+            <div class="metric-num" style="color: var(--accent-emerald);">
+              100.0% <span class="metric-sub">10 / 10</span>
+            </div>
+            <div class="metric-tagline">0% crash rate across rigorous evaluation runs</div>
           </div>
-          <div class="stat-box">
-            <div class="stat-num" style="color: var(--accent-amber);">1,000</div>
-            <div class="stat-label">Hacked Hover Steps</div>
+
+          <div class="metric-card">
+            <div class="metric-label">Specification Gaming</div>
+            <div class="metric-num" style="color: var(--accent-amber);">
+              1,000 <span class="metric-sub">frames</span>
+            </div>
+            <div class="metric-tagline">Intentionally triggered hover exploit (+1.5/frame)</div>
           </div>
-          <div class="stat-box">
-            <div class="stat-num" style="color: var(--accent-blue);">3,500+</div>
-            <div class="stat-label">Vectorized FPS (CPU)</div>
+
+          <div class="metric-card">
+            <div class="metric-label">Vectorized Throughput</div>
+            <div class="metric-num" style="color: var(--accent-cyan);">
+              3,500+ <span class="metric-sub">FPS</span>
+            </div>
+            <div class="metric-tagline">4 parallel vectorized environments on standard CPU</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Interactive Flight Telemetry Replay Deck -->
+    <!-- Visual Flight Workbench Section -->
     <section id="workbench" class="report-section">
       <div class="container">
         <div class="section-heading-group">
-          <span class="section-kicker">Empirical Observations</span>
-          <h2 class="section-title-large">Flight Telemetry & Behavioral Workbench</h2>
+          <span class="section-kicker">Empirical Replay Deck</span>
+          <h2 class="section-title">Flight Telemetry & Behavioral Workbench</h2>
           <p class="section-lead">
             High-fidelity evaluation recordings augmented with an aerospace Heads-Up Display (HUD) displaying real-time altitude, velocity vectors, pitch attitude, and landing gear sensor states.
           </p>
         </div>
 
         <div class="workbench-tabs">
-          <button class="workbench-tab active" onclick="selectMode('default', this)">01. Default Solver (Baseline)</button>
-          <button class="workbench-tab" onclick="selectMode('hack', this)">02. Reward Hacking (Specification Gaming)</button>
-          <button class="workbench-tab" onclick="selectMode('fixed', this)">03. Fixed Potential Shaping (Recovery)</button>
-          <button class="workbench-tab" onclick="selectMode('deep', this)">04. Deep ResMLP Guidance (High-Definition)</button>
+          <button class="workbench-tab active" onclick="selectMode('default', this)">🚀 01. Default Solver (Baseline)</button>
+          <button class="workbench-tab" onclick="selectMode('hack', this)">⚠️ 02. Reward Hacking (Specification Gaming)</button>
+          <button class="workbench-tab" onclick="selectMode('fixed', this)">🛡️ 03. Fixed Shaping (Recovery)</button>
+          <button class="workbench-tab" onclick="selectMode('deep', this)">🧠 04. Deep ResMLP Guidance (High-Definition)</button>
         </div>
 
         <div class="workbench-display">
           <div class="viewport-container">
             <img id="flightVideo" src="assets/demo_default.gif" alt="Flight Telemetry HUD Replay">
+            <div class="viewport-overlay-tag" id="viewportTag">REC · 50 FPS · HUD ACTIVE</div>
           </div>
+
           <div class="telemetry-dashboard">
             <div class="telemetry-header">
-              <span class="mode-pill" id="modePill" style="background: var(--accent-emerald-subtle); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.2);">
+              <span class="mode-pill" id="modePill" style="background: var(--accent-emerald-subtle); color: var(--accent-emerald); border: 1px solid rgba(16, 185, 129, 0.25);">
                 MODE: DEFAULT PPO SOLVER
               </span>
               <h3 class="telemetry-title" id="modeTitle">Autonomous Precision Touchdown</h3>
@@ -788,18 +1125,18 @@
             <table class="spec-table">
               <tr>
                 <td>MEAN REWARD (10 EPS)</td>
-                <td id="specScore" class="col-highlight" style="color: var(--accent-emerald);">277.10 ± 19.90</td>
+                <td id="specScore" style="color: var(--accent-emerald);">277.10 ± 19.90</td>
               </tr>
               <tr>
                 <td>TOUCHDOWN SUCCESS</td>
-                <td id="specTouchdown" class="col-highlight">10 / 10 (100.0%)</td>
+                <td id="specTouchdown">10 / 10 (100.0%)</td>
               </tr>
               <tr>
                 <td>MEAN DURATION</td>
                 <td id="specSteps">245.1 frames (~4.9s)</td>
               </tr>
               <tr>
-                <td>FAILURE / CRASH RATE</td>
+                <td>CRASH RATE</td>
                 <td id="specCrashes">0.0%</td>
               </tr>
               <tr>
@@ -812,71 +1149,137 @@
       </div>
     </section>
 
-    <!-- Mathematical Formulation -->
+    <!-- Interactive Human vs AI Duel Arena -->
+    <section id="duel-arena" class="report-section">
+      <div class="container">
+        <div class="section-heading-group">
+          <span class="section-kicker">Interactive Flight Deck</span>
+          <h2 class="section-title">Playable Flight Arena: Human vs AI Live Duel</h2>
+          <p class="section-lead">
+            Take manual control and race in real time against the autonomous neural policy. Pilot the human lander on the left while racing the trained PPO agent on the right on identical terrain and initial altitude.
+          </p>
+        </div>
+
+        <div class="duel-arena-wrapper">
+          <!-- Top Telemetry & Status Bar -->
+          <div class="duel-topbar">
+            <div class="duel-score-badge">
+              <span class="mode-pill" style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.35);">
+                PILOT: YOU (HUMAN)
+              </span>
+              <span id="humanDuelScore" style="color: #60a5fa; font-weight: 700;">SCORE: +0.0 pts</span>
+              <span id="humanDuelStatus" style="color: var(--text-muted); font-size: 0.8rem;">[AIRBORNE]</span>
+            </div>
+
+            <div id="duelMatchBanner" style="font-family: var(--font-mono); font-size: 0.92rem; font-weight: 700; color: var(--accent-cyan); text-align: center;">
+              ⚡ RACE ACTIVE — TOUCH DOWN GENTLY BETWEEN THE PAD FLAGS
+            </div>
+
+            <div class="duel-score-badge">
+              <span class="mode-pill" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.35);">
+                PILOT: PPO NEURAL AGENT
+              </span>
+              <span id="aiDuelScore" style="color: #c084fc; font-weight: 700;">SCORE: +0.0 pts</span>
+              <span id="aiDuelStatus" style="color: var(--text-muted); font-size: 0.8rem;">[AIRBORNE]</span>
+            </div>
+          </div>
+
+          <!-- Canvas Display -->
+          <div class="duel-canvas-container">
+            <canvas id="duelCanvas" width="960" height="420"></canvas>
+          </div>
+
+          <!-- Controls & Interaction Bar -->
+          <div class="duel-controls-bar">
+            <div class="duel-btn-group">
+              <button class="duel-btn" id="btnTiltLeft" onmousedown="setHumanThrust('left', true)" onmouseup="setHumanThrust('left', false)" ontouchstart="setHumanThrust('left', true)" ontouchend="setHumanThrust('left', false)">
+                ◀ TILT LEFT <span class="key-pill" id="keyPillA">A / ←</span>
+              </button>
+              <button class="duel-btn btn-thrust" id="btnMainThrust" onmousedown="setHumanThrust('main', true)" onmouseup="setHumanThrust('main', false)" ontouchstart="setHumanThrust('main', true)" ontouchend="setHumanThrust('main', false)">
+                ▲ MAIN THRUST <span class="key-pill" id="keyPillW">W / ↑</span>
+              </button>
+              <button class="duel-btn" id="btnTiltRight" onmousedown="setHumanThrust('right', true)" onmouseup="setHumanThrust('right', false)" ontouchstart="setHumanThrust('right', true)" ontouchend="setHumanThrust('right', false)">
+                TILT RIGHT ▶ <span class="key-pill" id="keyPillD">D / →</span>
+              </button>
+              <button class="duel-btn" onclick="resetDuelMatch()" style="color: var(--accent-amber); border-color: rgba(245, 158, 11, 0.4);">
+                ↺ RESTART MATCH <span class="key-pill" id="keyPillR">R</span>
+              </button>
+            </div>
+
+            <div class="key-indicators">
+              <span>🖥️ Native 50 FPS Desktop App:</span>
+              <code style="color: var(--accent-cyan); background: rgba(0,0,0,0.5); padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border-subtle);">python play.py --mode duel</code>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Mathematical Formulation Section -->
     <section id="math" class="report-section">
       <div class="container">
         <div class="section-heading-group">
           <span class="section-kicker">Analytical Formulation</span>
-          <h2 class="section-title-large">Reward Shaping Functions</h2>
+          <h2 class="section-title">Potential-Based Reward Shaping & Loopholes</h2>
           <p class="section-lead">
-            Formal mathematical definitions comparing the environment's canonical shaping against the intentional survival vulnerability and the penalized fix.
+            Formal mathematical definitions comparing the environment's canonical potential shaping against intentional specification gaming and the penalized recovery formulation.
           </p>
         </div>
 
         <div class="math-grid">
-          <!-- Default Math Card -->
+          <!-- Card 1: Canonical Default -->
           <div class="math-card">
-            <div class="math-card-title">
-              <span>Canonical Shaping (Default)</span>
-              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-emerald);">Gymnasium v3</span>
+            <div class="math-card-header">
+              <span class="math-card-title">Canonical Shaping (Default)</span>
+              <span class="mode-pill" style="background: var(--accent-emerald-subtle); color: var(--accent-emerald);">Gymnasium v3</span>
             </div>
-            <div class="math-formula">
-R_t = \Delta\Phi(s_t) - c_{\text{main}} - c_{\text{side}} + 10(l_1 + l_2)
+            <div class="math-box">
+              $$R_t = \Delta\Phi(s_t) - c_{\text{main}} - c_{\text{side}} + 10(l_1 + l_2)$$
             </div>
             <p class="math-explanation">
-              Where $\Phi(s) = -100\sqrt{x^2+y^2} - 100\sqrt{v_x^2+v_y^2} - 100|\theta|$. Progress towards the landing pad center generates positive reward differences ($\Delta\Phi > 0$), while engine firings incur fuel cost deductions.
+              Where potential $\Phi(s) = -100\sqrt{x^2+y^2} - 100\sqrt{v_x^2+v_y^2} - 100|\theta|$. Progress toward pad center yields positive reward deltas ($\Delta\Phi > 0$), while engine firings subtract fuel cost deductions.
             </p>
           </div>
 
-          <!-- Hack Math Card -->
+          <!-- Card 2: Hacking Loophole -->
           <div class="math-card">
-            <div class="math-card-title">
-              <span>Survival Hack Formulation</span>
-              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-amber);">Exploitation</span>
+            <div class="math-card-header">
+              <span class="math-card-title">Specification Gaming (Hack)</span>
+              <span class="mode-pill" style="background: var(--accent-amber-subtle); color: var(--accent-amber);">Vulnerability</span>
             </div>
-            <div class="math-formula">
-R_{\text{hack}} = R_t + \beta_{\text{survival}} \quad (\beta = +1.5/\text{frame})
+            <div class="math-box">
+              $$R_t = R_{\text{default}} + \beta_{\text{survival}} \quad (\beta = +1.50)$$
             </div>
             <p class="math-explanation">
-              Because an episode truncates at $T = 1,000$ steps, hovering yields $1,000 \times 1.5 = +1,500$ points. Landing terminates the episode prematurely, granting only a one-time $+100$ bonus. The rational policy avoids touchdown.
+              Adds a constant survival bonus. Over 1,000 steps, hovering generates $+1,500$ points—vastly overshadowing the $+100$ touchdown bonus. The optimal policy mathematically becomes: <em>never land, hover until timeout</em>.
             </p>
           </div>
 
-          <!-- Fixed Math Card -->
+          <!-- Card 3: Fixed Recovery -->
           <div class="math-card">
-            <div class="math-card-title">
-              <span>Penalized Shaping (Fixed)</span>
-              <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-blue);">Alignment Fix</span>
+            <div class="math-card-header">
+              <span class="math-card-title">Penalized Potential (Fixed)</span>
+              <span class="mode-pill" style="background: var(--accent-emerald-subtle); color: var(--accent-emerald);">Aligned</span>
             </div>
-            <div class="math-formula">
-R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
+            <div class="math-box">
+              $$R_t = R_{\text{default}} - c_{\text{step}} + 0.20(l_1 + l_2) \quad (c = 0.05)$$
             </div>
             <p class="math-explanation">
-              Applying a per-step time tax ($c_{\text{step}} = -0.05$) directly penalizes lingering in mid-air. Ground contact sensors are rewarded ($\alpha = +0.2$), aligning policy gradient incentives with rapid, safe landing.
+              Introduces an explicit time penalty $(-0.05/\text{frame})$ while augmenting leg sensor touchdown rewards. Hovering costs fuel and time; expeditious safe landing is strictly incentivized.
             </p>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Benchmark Results Table -->
+    <!-- Empirical Benchmarks Section -->
     <section id="benchmarks" class="report-section">
       <div class="container">
         <div class="section-heading-group">
-          <span class="section-kicker">Quantitative Validation</span>
-          <h2 class="section-title-large">Empirical Benchmark Summary</h2>
+          <span class="section-kicker">Experimental Validation</span>
+          <h2 class="section-title">Empirical Benchmark Matrix</h2>
           <p class="section-lead">
-            Statistical results averaged across 10 evaluation episodes initialized with fixed deterministic seeds for strict scientific reproducibility.
+            Standardized evaluation results across 10 deterministic test seeds (1337). Official LunarLander-v3 solved threshold is $\ge 200.0$ points.
           </p>
         </div>
 
@@ -884,60 +1287,60 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
           <table class="benchmark-table">
             <thead>
               <tr>
-                <th>Experiment Mode</th>
+                <th>Experiment Configuration</th>
+                <th>Neural Architecture</th>
                 <th>Training Steps</th>
-                <th>Mean Reward (μ ± σ)</th>
+                <th>Mean Score (μ ± σ)</th>
                 <th>Touchdown Rate</th>
-                <th>Hover / Timeout Rate</th>
-                <th>Mean Duration</th>
+                <th>Mean Frames</th>
                 <th>Outcome Status</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="col-highlight">Deep ResMLP Guidance</td>
+                <td><strong>Deep ResMLP Guidance</strong></td>
+                <td>Decoupled [256, 256, 128]</td>
                 <td>350,000</td>
-                <td class="col-highlight" style="color: var(--accent-blue);">274.75 ± 20.31</td>
+                <td style="color: var(--accent-cyan); font-weight: 700;">274.75 ± 20.31</td>
                 <td>10 / 10 (100.0%)</td>
-                <td>0.0%</td>
                 <td>259.0 frames</td>
-                <td style="color: var(--accent-blue); font-weight: 500;">✓ HIGH-PRECISION SOLVED</td>
+                <td><span class="badge-solved">✓ HIGH-PRECISION SOLVED</span></td>
               </tr>
               <tr>
-                <td class="col-highlight">Default PPO Solver</td>
+                <td><strong>Default PPO Solver</strong></td>
+                <td>Standard MLP [64, 64]</td>
                 <td>600,000</td>
-                <td class="col-highlight" style="color: var(--accent-emerald);">277.10 ± 19.90</td>
+                <td style="color: var(--accent-emerald); font-weight: 700;">277.10 ± 19.90</td>
                 <td>10 / 10 (100.0%)</td>
-                <td>0.0%</td>
                 <td>245.1 frames</td>
-                <td style="color: var(--accent-emerald); font-weight: 500;">✓ PASSED (Solved)</td>
+                <td><span class="badge-solved">✓ PASSED (Solved)</span></td>
               </tr>
               <tr>
-                <td class="col-highlight">Reward Hacking (+1.5)</td>
-                <td>300,000</td>
-                <td class="col-highlight" style="color: var(--accent-amber);">1,480.0 (shaped)</td>
-                <td>0 / 10 (0.0%)</td>
-                <td>10 / 10 (100.0%)</td>
-                <td>1,000.0 frames</td>
-                <td style="color: var(--accent-amber); font-weight: 500;">⚠ HOVER EXPLOIT</td>
-              </tr>
-              <tr>
-                <td class="col-highlight">Fixed Shaping Recovery</td>
+                <td><strong>Fixed Potential Shaping</strong></td>
+                <td>Standard MLP [64, 64]</td>
                 <td>500,000</td>
-                <td class="col-highlight" style="color: var(--accent-emerald);">259.71 ± 18.50</td>
+                <td style="color: var(--accent-emerald); font-weight: 700;">259.71 ± 18.50</td>
                 <td>10 / 10 (100.0%)</td>
-                <td>0.0%</td>
                 <td>322.5 frames</td>
-                <td style="color: var(--accent-emerald); font-weight: 500;">✓ PASSED (Solved)</td>
+                <td><span class="badge-solved">✓ PASSED (Solved)</span></td>
               </tr>
               <tr>
-                <td class="col-highlight">Untrained Baseline</td>
-                <td>0 (Random)</td>
-                <td class="col-highlight" style="color: var(--accent-rose);">-183.17 ± 95.40</td>
+                <td><strong>Reward Hacking (+1.5)</strong></td>
+                <td>Standard MLP [64, 64]</td>
+                <td>300,000</td>
+                <td style="color: var(--accent-amber); font-weight: 700;">1,480.0 (shaped)</td>
                 <td>0 / 10 (0.0%)</td>
-                <td>0.0%</td>
+                <td>1,000.0 frames</td>
+                <td><span class="badge-exploit">⚠ HOVER EXPLOIT</span></td>
+              </tr>
+              <tr>
+                <td><strong>Untrained Baseline</strong></td>
+                <td>Random Uniform Action</td>
+                <td>0 (Random)</td>
+                <td style="color: var(--accent-rose); font-weight: 700;">-183.17 ± 95.40</td>
+                <td>0 / 10 (0.0%)</td>
                 <td>95.2 frames</td>
-                <td style="color: var(--accent-rose); font-weight: 500;">✗ 100% HIGH-SPEED CRASH</td>
+                <td><span class="badge-crash">✗ 100% CRASH</span></td>
               </tr>
             </tbody>
           </table>
@@ -945,14 +1348,14 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       </div>
     </section>
 
-    <!-- Interactive Incentive Simulator -->
+    <!-- Interactive Incentive Horizon Simulator -->
     <section id="simulator" class="report-section">
       <div class="container">
         <div class="section-heading-group">
-          <span class="section-kicker">Interactive Sandbox</span>
-          <h2 class="section-title-large">Policy Incentive Horizon Simulator</h2>
+          <span class="section-kicker">Interactive Analytical Tool</span>
+          <h2 class="section-title">Policy Incentive Horizon Simulator</h2>
           <p class="section-lead">
-            Explore the mathematical breakeven threshold where survival bonuses trigger hovering exploits over touchdown incentives.
+            Dynamically calculate the economic payoff threshold where per-step survival bonuses mathematically overpower terminal pad touchdown bonuses.
           </p>
         </div>
 
@@ -996,104 +1399,36 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       </div>
     </section>
 
-    <!-- Interactive Human vs AI Duel Arena -->
-    <section id="duel-arena" class="report-section">
-      <div class="container">
-        <div class="section-heading-group">
-          <span class="section-kicker">Interactive Testbed</span>
-          <h2 class="section-title-large">Playable Flight Arena: Human vs AI Live Duel</h2>
-          <p class="section-lead">
-            Test your piloting reflexes against the neural guidance policy in real time. Use your keyboard [Arrow Keys / WASD] or on-screen controls to pilot the human lander on the left while racing the trained PPO agent on the right on identical terrain.
-          </p>
-        </div>
-
-        <div class="duel-arena-wrapper">
-          <!-- Top Telemetry & Status Bar -->
-          <div class="duel-topbar">
-            <div class="duel-score-badge">
-              <span class="mode-pill" style="background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); border: 1px solid rgba(59, 130, 246, 0.3);">
-                PILOT: YOU (HUMAN)
-              </span>
-              <span id="humanDuelScore" style="color: var(--accent-blue); font-weight: 700;">SCORE: +0.0 pts</span>
-              <span id="humanDuelStatus" style="color: var(--text-muted); font-size: 0.8rem;">[AIRBORNE]</span>
-            </div>
-
-            <div id="duelMatchBanner" style="font-family: var(--font-mono); font-size: 0.92rem; font-weight: 700; color: var(--accent-cyan); text-align: center;">
-              ⚡ RACE ACTIVE — TOUCH DOWN GENTLY BETWEEN THE FLAGS
-            </div>
-
-            <div class="duel-score-badge">
-              <span class="mode-pill" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3);">
-                PILOT: PPO NEURAL AGENT
-              </span>
-              <span id="aiDuelScore" style="color: #c084fc; font-weight: 700;">SCORE: +0.0 pts</span>
-              <span id="aiDuelStatus" style="color: var(--text-muted); font-size: 0.8rem;">[AIRBORNE]</span>
-            </div>
-          </div>
-
-          <!-- Canvas Display -->
-          <div class="duel-canvas-container">
-            <canvas id="duelCanvas" width="960" height="420"></canvas>
-          </div>
-
-          <!-- Controls & Interaction Bar -->
-          <div class="duel-controls-bar">
-            <div class="duel-btn-group">
-              <button class="duel-btn" id="btnTiltLeft" onmousedown="setHumanThrust('left', true)" onmouseup="setHumanThrust('left', false)" ontouchstart="setHumanThrust('left', true)" ontouchend="setHumanThrust('left', false)">
-                ◀ TILT LEFT [A / ←]
-              </button>
-              <button class="duel-btn" id="btnMainThrust" style="background: rgba(59, 130, 246, 0.2); border-color: var(--accent-blue); font-weight: 700;" onmousedown="setHumanThrust('main', true)" onmouseup="setHumanThrust('main', false)" ontouchstart="setHumanThrust('main', true)" ontouchend="setHumanThrust('main', false)">
-                ▲ MAIN THRUST [W / ↑]
-              </button>
-              <button class="duel-btn" id="btnTiltRight" onmousedown="setHumanThrust('right', true)" onmouseup="setHumanThrust('right', false)" ontouchstart="setHumanThrust('right', true)" ontouchend="setHumanThrust('right', false)">
-                TILT RIGHT [D / →] ▶
-              </button>
-              <button class="duel-btn" onclick="resetDuelMatch()" style="color: var(--accent-amber); border-color: rgba(245, 158, 11, 0.4);">
-                ↺ RESTART MATCH [R]
-              </button>
-            </div>
-
-            <div class="duel-desktop-tip">
-              💡 Desktop App: <code style="color: var(--accent-cyan); background: rgba(0,0,0,0.4); padding: 2px 6px; border-radius: 4px;">python play.py --mode duel</code>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Quickstart & CLI Reference -->
+    <!-- Reproduction Protocol / CLI Reference -->
     <section id="quickstart" class="report-section">
       <div class="container">
         <div class="section-heading-group">
           <span class="section-kicker">Reproduction Protocol</span>
-          <h2 class="section-title-large">Command Line Execution</h2>
+          <h2 class="section-title">Command Line Execution & Verification</h2>
           <p class="section-lead">
-            Every experiment is reproducible via modular CLI flags. No external cloud dependencies or GPUs required.
+            Every experiment and model checkpoint is directly reproducible through modular CLI arguments on Linux, macOS, and Windows.
           </p>
         </div>
 
         <div class="cli-panel">
           <div class="cli-header">
             <div class="cli-dots">
-              <div class="cli-dot"></div>
-              <div class="cli-dot"></div>
-              <div class="cli-dot"></div>
+              <div class="cli-dot dot-red"></div>
+              <div class="cli-dot dot-yellow"></div>
+              <div class="cli-dot dot-green"></div>
             </div>
             <div class="cli-tabs">
-              <button class="cli-tab-btn active" onclick="setCliTab('eval', this)">1. Evaluate Models</button>
-              <button class="cli-tab-btn" onclick="setCliTab('train', this)">2. Train PPO</button>
-              <button class="cli-tab-btn" onclick="setCliTab('hud', this)">3. Record Telemetry HUD</button>
-              <button class="cli-tab-btn" onclick="setCliTab('play', this)">4. Human vs AI Duel</button>
+              <button class="cli-tab-btn active" onclick="setCliTab('play', this)">1. Human vs AI Duel</button>
+              <button class="cli-tab-btn" onclick="setCliTab('eval', this)">2. Evaluate Models</button>
+              <button class="cli-tab-btn" onclick="setCliTab('train', this)">3. Train PPO</button>
+              <button class="cli-tab-btn" onclick="setCliTab('hud', this)">4. Record HUD Telemetry</button>
             </div>
           </div>
-          <pre class="cli-code" id="cliCode"><span class="c-comment"># 1. Evaluate the official solved default model across 10 test seeds</span>
-<span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_default --episodes 10</span>
 
-<span class="c-comment"># 2. Benchmark the reward hacking policy (100% hover timeout rate)</span>
-<span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_hack --episodes 10</span>
-
-<span class="c-comment"># 3. Verify the fixed shaping recovery model (100% safe touchdown)</span>
-<span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_fixed --episodes 10</span></pre>
+          <div class="cli-code-wrapper">
+            <button class="btn-copy-code" id="btnCopyCode" onclick="copyCliCommand()">Copy</button>
+            <pre class="cli-code" id="cliCode"></pre>
+          </div>
         </div>
       </div>
     </section>
@@ -1103,28 +1438,29 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
   <footer class="site-footer">
     <div class="container footer-inner">
       <div>
-        <span>LunarLander-PPO Technical Report</span> • <span>MIT Licensed Open Source Research</span>
+        <strong>LunarLander-RL Research Project</strong> · Authored by <a href="https://github.com/KADHIRAVANEG" target="_blank">Kadhiravan E. G.</a>
       </div>
       <div>
-        <a href="https://github.com/JOKER-53/crashandlearn" target="_blank">Repository (GitHub)</a> •
-        <a href="notebooks/lunar_lander_demo.ipynb">Colab Demonstration</a>
+        <a href="https://github.com/JOKER-53/crashandlearn" target="_blank">GitHub Repository</a> •
+        <a href="https://gymnasium.farama.org/environments/box2d/lunar_lander/" target="_blank">Gymnasium Docs</a> •
+        <a href="https://stable-baselines3.readthedocs.io/" target="_blank">Stable-Baselines3</a>
       </div>
     </div>
   </footer>
 
+  <!-- Scripts -->
   <script>
-    // Telemetry Replay Deck Mode Switcher
+    // Mode Configs for Telemetry Workbench
     const modeConfigs = {
       default: {
         pill: 'MODE: DEFAULT PPO SOLVER',
         pillColor: 'var(--accent-emerald)',
         pillBg: 'var(--accent-emerald-subtle)',
-        pillBorder: 'rgba(16, 185, 129, 0.2)',
+        tag: 'REC · 50 FPS · HUD ACTIVE',
         title: 'Autonomous Precision Touchdown',
         desc: 'Using potential-based delta distance shaping, the policy converges on efficient main-engine counter-thrust pulses, decelerating from high orbital descent to a stable 2-point vertical landing.',
         video: 'assets/demo_default.gif',
         score: '277.10 ± 19.90',
-        scoreColor: 'var(--accent-emerald)',
         touchdown: '10 / 10 (100.0%)',
         steps: '245.1 frames (~4.9s)',
         crashes: '0.0%',
@@ -1134,12 +1470,11 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
         pill: 'MODE: REWARD HACK (+1.5/FRAME)',
         pillColor: 'var(--accent-amber)',
         pillBg: 'var(--accent-amber-subtle)',
-        pillBorder: 'rgba(245, 158, 11, 0.2)',
+        tag: 'REC · 1,000 FRAMES TIMEOUT',
         title: 'Specification Gaming / Hover Loophole',
         desc: 'Trained with an intuitive +1.5/frame survival bonus. Over 1,000 steps, hovering yields ~1,480 points, rendering touchdown financially suboptimal. The policy intentionally hovers in mid-air until timeout.',
         video: 'assets/demo_hack.gif',
         score: '1,480.0 (shaped) / -162.36 (env)',
-        scoreColor: 'var(--accent-amber)',
         touchdown: '0 / 10 (0.0%)',
         steps: '1,000.0 frames (Timeout)',
         crashes: '0.0%',
@@ -1149,12 +1484,11 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
         pill: 'MODE: FIXED SHAPING RECOVERY',
         pillColor: 'var(--accent-emerald)',
         pillBg: 'var(--accent-emerald-subtle)',
-        pillBorder: 'rgba(16, 185, 129, 0.2)',
+        tag: 'REC · POTENTIAL ALIGNED',
         title: 'Penalized Step Potential Recovery',
         desc: 'Introduces an explicit time penalty (-0.05/frame) while rewarding leg touchdown sensors. Floating in air depletes score rapidly, compelling the policy to descend and land cleanly.',
         video: 'assets/demo_fixed.gif',
         score: '259.71 ± 18.50',
-        scoreColor: 'var(--accent-emerald)',
         touchdown: '10 / 10 (100.0%)',
         steps: '322.5 frames (~6.4s)',
         crashes: '0.0%',
@@ -1162,14 +1496,13 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       },
       deep: {
         pill: 'MODE: DEEP GUIDANCE NETWORK (ResMLP)',
-        pillColor: 'var(--accent-blue)',
-        pillBg: 'var(--accent-blue-subtle)',
-        pillBorder: 'rgba(59, 130, 246, 0.2)',
+        pillColor: 'var(--accent-cyan)',
+        pillBg: 'var(--accent-cyan-subtle)',
+        tag: 'REC · DECOUPLED RESMLP',
         title: 'High-Definition Residual Neural Guidance',
-        desc: 'Leverages dual 256-dimensional ResMLP blocks with contraction scaling (0.1), GELU activations, and decoupled actor-critic heads for high-bandwidth telemetry feature extraction and precision descent.',
+        desc: 'Leverages dual 256-dimensional ResMLP blocks with contraction scaling (0.1), decoupled actor-critic heads, and orthogonal initialization for high-bandwidth telemetry feature extraction and precision descent.',
         video: 'assets/demo_deep.gif',
         score: '274.75 ± 20.31',
-        scoreColor: 'var(--accent-blue)',
         touchdown: '10 / 10 (100.0%)',
         steps: '259.0 frames (~5.2s)',
         crashes: '0.0%',
@@ -1186,15 +1519,15 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       pill.textContent = c.pill;
       pill.style.color = c.pillColor;
       pill.style.background = c.pillBg;
-      pill.style.borderColor = c.pillBorder;
 
+      document.getElementById('viewportTag').textContent = c.tag;
       document.getElementById('modeTitle').textContent = c.title;
       document.getElementById('modeDesc').textContent = c.desc;
       document.getElementById('flightVideo').src = c.video;
 
       const scoreEl = document.getElementById('specScore');
       scoreEl.textContent = c.score;
-      scoreEl.style.color = c.scoreColor;
+      scoreEl.style.color = c.pillColor;
 
       document.getElementById('specTouchdown').textContent = c.touchdown;
       document.getElementById('specSteps').textContent = c.steps;
@@ -1248,17 +1581,32 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
 
     // CLI Snippets
     const cliSnippets = {
+      play: `<span class="c-comment"># 1. Launch Interactive Split-Screen Human vs AI Duel (50 FPS Pygame Desktop)</span>
+<span class="c-cmd">venv/bin/python play.py --mode duel --model models/ppo_deep_discrete</span>
+
+<span class="c-comment"># 2. Solo Pilot Practice Mode (Human Pilot Practice with Telemetry HUD)</span>
+<span class="c-cmd">venv/bin/python play.py --mode solo</span>
+
+<span class="c-comment"># 3. Race against different model variants (e.g. Reward Hacking Agent)</span>
+<span class="c-cmd">venv/bin/python play.py --mode duel --model models/ppo_hack</span>`,
+
       eval: `<span class="c-comment"># 1. Evaluate the official solved default model across 10 test seeds</span>
 <span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_default --episodes 10</span>
 
-<span class="c-comment"># 2. Benchmark the reward hacking policy (100% hover timeout rate)</span>
+<span class="c-comment"># 2. Benchmark the Deep ResMLP Guidance model</span>
+<span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_deep_discrete --episodes 10</span>
+
+<span class="c-comment"># 3. Benchmark the reward hacking policy (100% hover timeout rate)</span>
 <span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_hack --episodes 10</span>
 
-<span class="c-comment"># 3. Verify the fixed shaping recovery model (100% safe touchdown)</span>
+<span class="c-comment"># 4. Verify the fixed shaping recovery model (100% safe touchdown)</span>
 <span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_fixed --episodes 10</span>`,
 
       train: `<span class="c-comment"># Train Default Solver with 4 vectorized environments (3,500+ FPS)</span>
 <span class="c-cmd">venv/bin/python train.py --reward-mode default --timesteps 600000 --save-path models/ppo_default</span>
+
+<span class="c-comment"># Train High-Definition Deep Neural Guidance Network (ResMLP + GELU + LayerNorm)</span>
+<span class="c-cmd">venv/bin/python train.py --reward-mode default --network deep --timesteps 350000 --save-path models/ppo_deep_discrete</span>
 
 <span class="c-comment"># Train Reward Hacking exploit (+1.5/frame survival bonus)</span>
 <span class="c-cmd">venv/bin/python train.py --reward-mode hack --timesteps 300000 --save-path models/ppo_hack</span>
@@ -1267,25 +1615,35 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
 <span class="c-cmd">venv/bin/python train.py --reward-mode fixed --timesteps 500000 --save-path models/ppo_fixed</span>`,
 
       hud: `<span class="c-comment"># Record 1080p replay with Aerospace Telemetry HUD overlay</span>
-<span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_default --episodes 1 --record --video-dir videos/default</span>
+<span class="c-cmd">venv/bin/python evaluate.py --model models/ppo_deep_discrete --episodes 1 --record --video-dir videos/deep</span>
 
 <span class="c-comment"># Convert MP4 flight replay to optimized web demonstration GIF</span>
-<span class="c-cmd">venv/bin/python scripts/convert_to_gif.py -i videos/default/eval_ppo_default-episode-0.mp4 -o assets/demo_default.gif</span>`,
-
-      play: `<span class="c-comment"># 1. Launch Interactive Split-Screen Human vs AI Duel (50 FPS Pygame Desktop)</span>
-<span class="c-cmd">venv/bin/python play.py --mode duel --model models/ppo_deep_discrete</span>
-
-<span class="c-comment"># 2. Solo Practice Mode (Human Pilot Practice with Telemetry HUD)</span>
-<span class="c-cmd">venv/bin/python play.py --mode solo</span>
-
-<span class="c-comment"># 3. Race against different model variants (e.g. Reward Hacking Agent)</span>
-<span class="c-cmd">venv/bin/python play.py --mode duel --model models/ppo_hack</span>`
+<span class="c-cmd">venv/bin/python scripts/convert_to_gif.py -i videos/deep/eval_ppo_deep_discrete-episode-0.mp4 -o assets/demo_deep.gif</span>`
     };
 
+    let activeCliKey = 'play';
     function setCliTab(key, btn) {
+      activeCliKey = key;
       document.querySelectorAll('.cli-tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('cliCode').innerHTML = cliSnippets[key];
+    }
+    setCliTab('play', document.querySelector('.cli-tab-btn'));
+
+    function copyCliCommand() {
+      const el = document.getElementById('cliCode');
+      const text = el.innerText || el.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('btnCopyCode');
+        btn.textContent = 'Copied!';
+        btn.style.color = 'var(--accent-emerald)';
+        btn.style.borderColor = 'var(--accent-emerald)';
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.style.color = '';
+          btn.style.borderColor = '';
+        }, 1800);
+      });
     }
 
     /* ========================================================
@@ -1300,24 +1658,38 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
     const aiStatusEl = document.getElementById('aiDuelStatus');
     const duelBannerEl = document.getElementById('duelMatchBanner');
 
-    const gravity = 0.055;
-    const mainThrustAcc = 0.14;
-    const sideThrustRot = 0.005;
-    const padWidth = 80;
-    const groundY = 380;
+    const keyPillW = document.getElementById('keyPillW');
+    const keyPillA = document.getElementById('keyPillA');
+    const keyPillD = document.getElementById('keyPillD');
+
+    const gravity = 0.052;
+    const mainThrustAcc = 0.138;
+    const sideThrustRot = 0.0048;
+    const groundY = 375;
 
     let terrainPoints = [];
+    let stars = [];
     let matchActive = true;
+
+    // Generate starry cosmos
+    for (let i = 0; i < 70; i++) {
+      stars.push({
+        x: Math.random() * 960,
+        y: Math.random() * 320,
+        r: Math.random() * 1.5 + 0.5,
+        twinkle: Math.random() * Math.PI * 2
+      });
+    }
 
     function generateTerrain() {
       terrainPoints = [];
-      const segments = 16;
+      const segments = 24;
       const step = 480 / segments;
       for (let i = 0; i <= segments; i++) {
         const x = i * step;
         let y = groundY;
-        if (x < 190 || x > 290) {
-          y = groundY - 10 + Math.sin(i * 1.3) * 18 + Math.cos(i * 0.7) * 12;
+        if (x < 185 || x > 295) {
+          y = groundY - 12 + Math.sin(i * 1.1) * 22 + Math.cos(i * 0.6) * 14;
         }
         terrainPoints.push({ x, y });
       }
@@ -1331,13 +1703,13 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
 
       reset() {
         this.x = 240 + (Math.random() - 0.5) * 80;
-        this.y = 50 + Math.random() * 20;
-        this.vx = (Math.random() - 0.5) * 0.8;
-        this.vy = 0.2 + Math.random() * 0.2;
-        this.angle = (Math.random() - 0.5) * 0.2;
+        this.y = 52 + Math.random() * 20;
+        this.vx = (Math.random() - 0.5) * 0.7;
+        this.vy = 0.15 + Math.random() * 0.15;
+        this.angle = (Math.random() - 0.5) * 0.18;
         this.angVel = 0;
         this.score = 0;
-        this.state = 'flying'; // 'flying', 'landed', 'crashed'
+        this.state = 'flying';
         this.mainThrust = false;
         this.leftThrust = false;
         this.rightThrust = false;
@@ -1354,54 +1726,49 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
 
         this.steps++;
 
-        // AI Guidance Logic
         if (this.isAI) {
           this.computeAIGuidance();
         }
 
-        // Apply Forces
         if (this.mainThrust) {
           this.vx += Math.sin(this.angle) * mainThrustAcc;
           this.vy -= Math.cos(this.angle) * mainThrustAcc;
-          this.score -= 0.3; // Fuel penalty
-          this.spawnParticle(0, 14, 0.5, 2.5, '#f59e0b');
+          this.score -= 0.28;
+          this.spawnParticle(0, 16, 0.4, 2.6, '#f59e0b');
+          this.spawnParticle(0, 16, -0.4, 2.6, '#ffffff');
         }
 
         if (this.leftThrust) {
           this.angVel += sideThrustRot;
           this.score -= 0.03;
-          this.spawnParticle(-10, 0, -1.8, 0, '#38bdf8');
+          this.spawnParticle(-11, 2, -2.0, 0, '#38bdf8');
         }
 
         if (this.rightThrust) {
           this.angVel -= sideThrustRot;
           this.score -= 0.03;
-          this.spawnParticle(10, 0, 1.8, 0, '#38bdf8');
+          this.spawnParticle(11, 2, 2.0, 0, '#38bdf8');
         }
 
-        // Gravity & Inertia
         this.vy += gravity;
         this.angVel *= 0.985;
         this.angle += this.angVel;
         this.x += this.vx;
         this.y += this.vy;
 
-        // Potential-based step reward shaping
         const currentDist = Math.hypot(this.x - 240, this.y - groundY);
-        const deltaDist = (this.prevDist - currentDist) * 0.6;
+        const deltaDist = (this.prevDist - currentDist) * 0.65;
         this.score += deltaDist;
         this.prevDist = currentDist;
 
-        // Boundary containment
         if (this.x < 15) { this.x = 15; this.vx = 0; }
         if (this.x > 465) { this.x = 465; this.vx = 0; }
 
-        // Touchdown / Collision Detection
-        if (this.y >= groundY - 10) {
-          this.y = groundY - 10;
-          const onPad = (this.x >= 200 && this.x <= 280);
-          const gentleV = Math.abs(this.vy) < 1.6;
-          const gentleH = Math.abs(this.vx) < 1.1;
+        if (this.y >= groundY - 12) {
+          this.y = groundY - 12;
+          const onPad = (this.x >= 195 && this.x <= 285);
+          const gentleV = Math.abs(this.vy) < 1.55;
+          const gentleH = Math.abs(this.vx) < 1.05;
           const levelAngle = Math.abs(this.angle) < 0.22;
 
           if (onPad && gentleV && gentleH && levelAngle) {
@@ -1410,9 +1777,8 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
           } else {
             this.state = 'crashed';
             this.score -= 100;
-            // Explosion particles
-            for (let i = 0; i < 28; i++) {
-              this.spawnParticle(0, 0, (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5, '#ef4444');
+            for (let i = 0; i < 35; i++) {
+              this.spawnParticle(0, 0, (Math.random() - 0.5) * 6, (Math.random() - 0.5) * 6, '#ef4444');
             }
           }
         }
@@ -1424,17 +1790,15 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
         const dx = 240 - this.x;
         const distY = groundY - this.y;
 
-        // Target angle based on lateral position error
-        let targetAngle = Math.max(-0.35, Math.min(0.35, dx * 0.007 - this.vx * 0.12));
+        let targetAngle = Math.max(-0.35, Math.min(0.35, dx * 0.0075 - this.vx * 0.12));
         if (distY < 45) {
-          targetAngle = 0; // Level wings near surface
+          targetAngle = 0;
         }
 
         this.leftThrust = (this.angle < targetAngle - 0.025);
         this.rightThrust = (this.angle > targetAngle + 0.025);
 
-        // Vertical deceleration envelope
-        let targetVy = Math.max(-1.8, Math.min(-0.35, -distY * 0.012));
+        let targetVy = Math.max(-1.8, Math.min(-0.35, -distY * 0.0125));
         if (distY < 35) targetVy = -0.55;
 
         this.mainThrust = (this.vy > targetVy);
@@ -1461,7 +1825,7 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
           const p = this.particles[i];
           p.x += p.vx;
           p.y += p.vy;
-          p.life -= 0.04;
+          p.life -= 0.038;
           if (p.life <= 0) {
             this.particles.splice(i, 1);
           }
@@ -1469,13 +1833,13 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       }
 
       draw(ctx, offsetX) {
-        // Draw Particles
+        // Particles
         for (const p of this.particles) {
           ctx.save();
           ctx.globalAlpha = Math.max(0, p.life);
           ctx.fillStyle = p.color;
           ctx.beginPath();
-          ctx.arc(offsetX + p.x, p.y, 2.5 * p.life, 0, Math.PI * 2);
+          ctx.arc(offsetX + p.x, p.y, 2.8 * p.life, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         }
@@ -1486,48 +1850,56 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
         ctx.translate(offsetX + this.x, this.y);
         ctx.rotate(this.angle);
 
-        // Body Capsule
-        ctx.fillStyle = this.isAI ? '#8b5cf6' : '#3b82f6';
+        // Golden descent stage (foil insulation)
+        ctx.fillStyle = this.isAI ? '#7c3aed' : '#2563eb';
         ctx.strokeStyle = '#e2e8f0';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(-11, -10);
-        ctx.lineTo(11, -10);
-        ctx.lineTo(13, 8);
-        ctx.lineTo(-13, 8);
+        ctx.moveTo(-12, -9);
+        ctx.lineTo(12, -9);
+        ctx.lineTo(14, 9);
+        ctx.lineTo(-14, 9);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Cockpit Glass
+        // Ascent cabin
+        ctx.fillStyle = this.isAI ? '#a78bfa' : '#60a5fa';
+        ctx.beginPath();
+        ctx.arc(0, -9, 8, Math.PI, 0);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Cockpit window
         ctx.fillStyle = '#0284c7';
         ctx.beginPath();
-        ctx.arc(0, -2, 4, 0, Math.PI * 2);
+        ctx.arc(0, -8, 3.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Landing Legs
-        ctx.strokeStyle = '#94a3b8';
+        // Landing gear
+        ctx.strokeStyle = '#cbd5e1';
         ctx.lineWidth = 2;
-        // Left Leg
+        // Left
         ctx.beginPath();
-        ctx.moveTo(-11, 6);
-        ctx.lineTo(-17, 16);
-        ctx.lineTo(-21, 16);
+        ctx.moveTo(-11, 7);
+        ctx.lineTo(-18, 17);
+        ctx.lineTo(-22, 17);
         ctx.stroke();
-        // Right Leg
+        // Right
         ctx.beginPath();
-        ctx.moveTo(11, 6);
-        ctx.lineTo(17, 16);
-        ctx.lineTo(21, 16);
+        ctx.moveTo(11, 7);
+        ctx.lineTo(18, 17);
+        ctx.lineTo(22, 17);
         ctx.stroke();
 
-        // Thruster Nozzle
-        ctx.fillStyle = '#64748b';
+        // Engine Bell
+        ctx.fillStyle = '#475569';
         ctx.beginPath();
-        ctx.moveTo(-5, 8);
-        ctx.lineTo(5, 8);
-        ctx.lineTo(3, 12);
-        ctx.lineTo(-3, 12);
+        ctx.moveTo(-5, 9);
+        ctx.lineTo(5, 9);
+        ctx.lineTo(3, 14);
+        ctx.lineTo(-3, 14);
         ctx.closePath();
         ctx.fill();
 
@@ -1542,7 +1914,6 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       generateTerrain();
       humanCraft.reset();
       aiCraft.reset();
-      // Synchronize exact starting conditions
       aiCraft.x = humanCraft.x;
       aiCraft.y = humanCraft.y;
       aiCraft.vx = humanCraft.vx;
@@ -1550,7 +1921,7 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       aiCraft.angle = humanCraft.angle;
       aiCraft.prevDist = humanCraft.prevDist;
 
-      duelBannerEl.textContent = '⚡ RACE ACTIVE — TOUCH DOWN GENTLY BETWEEN THE FLAGS';
+      duelBannerEl.textContent = '⚡ RACE ACTIVE — TOUCH DOWN GENTLY BETWEEN THE PAD FLAGS';
       duelBannerEl.style.color = 'var(--accent-cyan)';
       matchActive = true;
     }
@@ -1561,21 +1932,24 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       if (type === 'right') humanCraft.rightThrust = active;
     }
 
-    // Keyboard Listeners
+    // Keyboard controls with visual indicator feedback
     window.addEventListener('keydown', (e) => {
       if (e.code === 'ArrowUp' || e.code === 'KeyW') {
         humanCraft.mainThrust = true;
         document.getElementById('btnMainThrust')?.classList.add('active');
+        keyPillW?.classList.add('lit');
         e.preventDefault();
       }
       if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
         humanCraft.leftThrust = true;
         document.getElementById('btnTiltLeft')?.classList.add('active');
+        keyPillA?.classList.add('lit');
         e.preventDefault();
       }
       if (e.code === 'ArrowRight' || e.code === 'KeyD') {
         humanCraft.rightThrust = true;
         document.getElementById('btnTiltRight')?.classList.add('active');
+        keyPillD?.classList.add('lit');
         e.preventDefault();
       }
       if (e.code === 'KeyR') {
@@ -1587,24 +1961,40 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       if (e.code === 'ArrowUp' || e.code === 'KeyW') {
         humanCraft.mainThrust = false;
         document.getElementById('btnMainThrust')?.classList.remove('active');
+        keyPillW?.classList.remove('lit');
       }
       if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
         humanCraft.leftThrust = false;
         document.getElementById('btnTiltLeft')?.classList.remove('active');
+        keyPillA?.classList.remove('lit');
       }
       if (e.code === 'ArrowRight' || e.code === 'KeyD') {
         humanCraft.rightThrust = false;
         document.getElementById('btnTiltRight')?.classList.remove('active');
+        keyPillD?.classList.remove('lit');
       }
     });
 
     function drawViewport(offsetX, pilotLabel, craft, color) {
-      // Starfield background
-      ctx.fillStyle = '#060811';
+      // Deep Space background
+      ctx.fillStyle = '#05070d';
       ctx.fillRect(offsetX, 0, 480, 420);
 
+      // Starfield
+      ctx.fillStyle = '#ffffff';
+      for (const s of stars) {
+        if (s.x >= offsetX && s.x < offsetX + 480) {
+          ctx.save();
+          ctx.globalAlpha = 0.3 + 0.5 * Math.sin(Date.now() * 0.003 + s.twinkle);
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
       // Moon Terrain
-      ctx.fillStyle = '#1e2433';
+      ctx.fillStyle = '#171c28';
       ctx.beginPath();
       ctx.moveTo(offsetX, 420);
       for (const pt of terrainPoints) {
@@ -1614,8 +2004,8 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       ctx.closePath();
       ctx.fill();
 
-      // Terrain Outline
-      ctx.strokeStyle = '#334155';
+      // Terrain illuminated ridge
+      ctx.strokeStyle = '#2d3748';
       ctx.lineWidth = 2;
       ctx.beginPath();
       for (let i = 0; i < terrainPoints.length; i++) {
@@ -1625,50 +2015,63 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       }
       ctx.stroke();
 
-      // Flat Landing Pad
-      ctx.fillStyle = '#475569';
-      ctx.fillRect(offsetX + 200, groundY - 2, 80, 4);
+      // Landing Pad
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(offsetX + 195, groundY - 2, 90, 5);
 
-      // Pad Flags
-      ctx.fillStyle = '#f59e0b';
-      // Left Flag
-      ctx.fillRect(offsetX + 202, groundY - 20, 2, 18);
+      // Pad cross-hatch marking
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(offsetX + 204, groundY - 20);
-      ctx.lineTo(offsetX + 214, groundY - 15);
-      ctx.lineTo(offsetX + 204, groundY - 10);
+      ctx.moveTo(offsetX + 200, groundY);
+      ctx.lineTo(offsetX + 280, groundY);
+      ctx.stroke();
+
+      // Animated beacon flags
+      const beaconGlow = Math.sin(Date.now() * 0.005) * 0.4 + 0.6;
+      ctx.fillStyle = `rgba(245, 158, 11, ${beaconGlow})`;
+      // Left flag
+      ctx.fillRect(offsetX + 196, groundY - 20, 2, 18);
+      ctx.beginPath();
+      ctx.moveTo(offsetX + 198, groundY - 20);
+      ctx.lineTo(offsetX + 208, groundY - 15);
+      ctx.lineTo(offsetX + 198, groundY - 10);
       ctx.fill();
 
-      // Right Flag
-      ctx.fillRect(offsetX + 278, groundY - 20, 2, 18);
+      // Right flag
+      ctx.fillRect(offsetX + 282, groundY - 20, 2, 18);
       ctx.beginPath();
-      ctx.moveTo(offsetX + 276, groundY - 20);
-      ctx.lineTo(offsetX + 266, groundY - 15);
-      ctx.lineTo(offsetX + 276, groundY - 10);
+      ctx.moveTo(offsetX + 280, groundY - 20);
+      ctx.lineTo(offsetX + 270, groundY - 15);
+      ctx.lineTo(offsetX + 280, groundY - 10);
       ctx.fill();
 
-      // Craft Drawing
+      // Render Craft
       craft.draw(ctx, offsetX);
 
-      // HUD Overlay
-      ctx.font = '12px Courier, monospace';
+      // HUD Telemetry Header
+      ctx.font = '600 12px "JetBrains Mono", monospace';
       ctx.fillStyle = color;
-      ctx.fillText(`${pilotLabel}`, offsetX + 16, 26);
+      ctx.fillText(pilotLabel, offsetX + 18, 28);
 
       const alt = Math.max(0, (groundY - craft.y) * 0.5).toFixed(1);
       const vy = (craft.vy * 5).toFixed(1);
-      const scoreStr = craft.score.toFixed(1);
+      const vx = (craft.vx * 5).toFixed(1);
+      const pitch = (craft.angle * 57.3).toFixed(1);
 
+      ctx.font = '11px "JetBrains Mono", monospace';
       ctx.fillStyle = '#94a3b8';
-      ctx.fillText(`ALT: ${alt}m | V.SPD: ${vy}m/s | PITCH: ${(craft.angle * 57.3).toFixed(1)}°`, offsetX + 16, 46);
+      ctx.fillText(`ALT: ${alt}m | V.SPD: ${vy}m/s | DRIFT: ${vx}m/s | PITCH: ${pitch}°`, offsetX + 18, 48);
 
-      // Outcome Tag
+      // Flight status banner
       if (craft.state === 'landed') {
         ctx.fillStyle = '#10b981';
-        ctx.fillText('✓ SAFE TOUCHDOWN (+100 PTS)', offsetX + 16, 68);
+        ctx.font = '700 12px "JetBrains Mono", monospace';
+        ctx.fillText('✓ SAFE TOUCHDOWN (+100 PTS)', offsetX + 18, 70);
       } else if (craft.state === 'crashed') {
         ctx.fillStyle = '#ef4444';
-        ctx.fillText('✗ CRASHED (-100 PTS)', offsetX + 16, 68);
+        ctx.font = '700 12px "JetBrains Mono", monospace';
+        ctx.fillText('✗ CRASH DETECTED (-100 PTS)', offsetX + 18, 70);
       }
     }
 
@@ -1676,13 +2079,13 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       humanCraft.update();
       aiCraft.update();
 
-      // Clear & Draw Left (Human)
-      drawViewport(0, 'PILOT: YOU (HUMAN)', humanCraft, '#38bdf8');
+      // Left Viewport (Human)
+      drawViewport(0, 'PILOT: YOU (HUMAN)', humanCraft, '#60a5fa');
 
-      // Clear & Draw Right (AI)
+      // Right Viewport (AI)
       drawViewport(480, 'PILOT: PPO AI SOLVER', aiCraft, '#c084fc');
 
-      // Center Divider Line
+      // Center Divider line with laser glow
       ctx.strokeStyle = '#00e5ff';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -1703,22 +2106,22 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       if (humanCraft.state !== 'flying' && aiCraft.state !== 'flying' && matchActive) {
         matchActive = false;
         if (humanCraft.state === 'landed' && aiCraft.state !== 'landed') {
-          duelBannerEl.textContent = '🏆 HUMAN VICTORY! You stuck the landing while AI crashed!';
+          duelBannerEl.textContent = '🏆 HUMAN VICTORY! You stuck the landing while the AI failed!';
           duelBannerEl.style.color = 'var(--accent-emerald)';
         } else if (aiCraft.state === 'landed' && humanCraft.state !== 'landed') {
-          duelBannerEl.textContent = '🤖 AI VICTORY! Machine guidance achieved flawless touchdown!';
+          duelBannerEl.textContent = '🤖 AI VICTORY! Autonomous policy achieved precision landing!';
           duelBannerEl.style.color = '#c084fc';
         } else if (humanCraft.state === 'landed' && aiCraft.state === 'landed') {
           const delta = humanCraft.score - aiCraft.score;
           if (delta > 0) {
-            duelBannerEl.textContent = `🏆 HUMAN OUTSCORES AI by +${delta.toFixed(1)} pts! Superior fuel efficiency!`;
+            duelBannerEl.textContent = `🏆 HUMAN WINS ON EFFICIENCY! (+${delta.toFixed(1)} pts higher than AI)`;
             duelBannerEl.style.color = 'var(--accent-emerald)';
           } else {
-            duelBannerEl.textContent = `🤖 BOTH LANDED! AI won on efficiency by +${(-delta).toFixed(1)} pts!`;
+            duelBannerEl.textContent = `🤖 BOTH LANDED SAFELY! AI won on efficiency (+${(-delta).toFixed(1)} pts)`;
             duelBannerEl.style.color = '#c084fc';
           }
         } else {
-          duelBannerEl.textContent = '💥 BOTH CRASHED! Press [R] to re-roll terrain and retry.';
+          duelBannerEl.textContent = '💥 BOTH CRASHED! Press [R] to retry with fresh terrain.';
           duelBannerEl.style.color = 'var(--accent-rose)';
         }
       }
@@ -1726,7 +2129,7 @@ R_{\text{fixed}} = R_t - c_{\text{step}} + \alpha_{\text{contact}}(l_1 + l_2)
       requestAnimationFrame(duelGameLoop);
     }
 
-    // Start Simulation
+    // Initialize
     generateTerrain();
     resetDuelMatch();
     requestAnimationFrame(duelGameLoop);
