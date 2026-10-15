@@ -170,13 +170,13 @@ lunar-lander-rl/
 
 ## 📊 Results
 
-| Reward Mode | Avg Score (20 eps) | Behavior |
-|-------------|:------------------:|----------|
-| Default | ~230 | Lands consistently |
-| Hack (+1/frame) | ~800+ | Hovers, never lands |
-| Fixed (delta + penalty) | ~220 | Lands consistently |
+| Reward Mode | Avg Score (10 eps) | Landing Rate | Behavior |
+|-------------|:------------------:|:------------:|----------|
+| **Default** | **~277.10** | **100%** | Lands dead-center consistently |
+| **Hack (+1.5/frame)** | **~1,480 (shaped)** | **0%** | Hovers indefinitely for 1,000 frames |
+| **Fixed (step penalty + legs)** | **~259.71** | **100%** | Lands safely within ~320 frames |
 
-> Score ≥ 200 is the official "solved" threshold for LunarLander-v3.
+> Score ≥ 200 is the official "solved" threshold for LunarLander-v3. Both Default and Fixed modes achieve 100% safe landings.
 
 ---
 

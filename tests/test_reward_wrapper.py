@@ -45,26 +45,22 @@ def test_hack_mode_adds_survival_bonus():
     obs, info = wrapped.reset()
     _, reward, _, _, info = wrapped.step(0)
 
-    # Base reward is 1.5, hack mode adds +1.0
-    assert pytest.approx(reward, 0.001) == 2.5
+    # Base reward is 1.5, hack mode adds +1.5
+    assert pytest.approx(reward, 0.001) == 3.0
     assert info["original_reward"] == 1.5
-    assert info["shaped_reward"] == 2.5
+    assert info["shaped_reward"] == 3.0
     assert info["reward_mode"] == "hack"
 
 
-def test_fixed_mode_step_penalty_and_delta():
+def test_fixed_mode_step_penalty_and_leg_bonus():
     dummy = DummyEnv()
     step_penalty = 0.05
     wrapped = CustomRewardWrapper(dummy, reward_mode="fixed", step_penalty=step_penalty)
     obs, info = wrapped.reset()
-    init_shaping = wrapped.prev_shaping
-    assert init_shaping is not None
 
     obs2, reward, terminated, truncated, info = wrapped.step(0)
-    current_shaping = wrapped.prev_shaping
-    expected_delta = current_shaping - init_shaping
-    expected_reward = expected_delta - step_penalty
-
+    # Base reward is 1.5, step penalty is 0.05, legs are [0, 0] so leg_bonus is 0
+    expected_reward = 1.5 - 0.05
     assert pytest.approx(reward, 0.001) == expected_reward
     assert info["reward_mode"] == "fixed"
 
