@@ -3,8 +3,8 @@
 ![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 ![RL](https://img.shields.io/badge/Algorithm-PPO-orange?style=flat-square)
-![Gymnasium](https://img.shields.io/badge/Gymnasium-LunarLander--v3-purple?style=flat-square)
 ![Colab](https://img.shields.io/badge/Open%20in-Colab-f9ab00?style=flat-square&logo=googlecolab)
+[![Website](https://img.shields.io/badge/Live-Web%20Dashboard-00f0ff?style=flat-square&logo=googlechrome)](https://joker-53.github.io/crashandlearn/)
 
 > Training an AI agent to land a rocket using Proximal Policy Optimization (PPO) — with hands-on reward shaping experiments that deliberately break and fix the agent.
 
