@@ -69,10 +69,16 @@ class LanderDuelGame:
         mode: str = "duel",
         seed: Optional[int] = None,
         target_fps: int = 50,
+        enable_wind: bool = False,
+        wind_power: float = 15.0,
+        turbulence_power: float = 1.5,
     ):
         self.mode = mode
         self.target_fps = target_fps
         self.current_seed = seed if seed is not None else int(time.time()) % 100000
+        self.enable_wind = enable_wind
+        self.wind_power = wind_power
+        self.turbulence_power = turbulence_power
 
         # Load AI model
         print(f"[*] Loading AI model from: {model_path}")
@@ -94,10 +100,17 @@ class LanderDuelGame:
 
         self.model_name = os.path.basename(model_path).replace(".zip", "")
 
-        # Initialize environments
-        self.human_env = gym.make("LunarLander-v3", render_mode="rgb_array")
+        # Initialize environments with optional wind dynamics
+        env_kwargs = {}
+        if self.enable_wind:
+            env_kwargs = {
+                "enable_wind": True,
+                "wind_power": self.wind_power,
+                "turbulence_power": self.turbulence_power,
+            }
+        self.human_env = gym.make("LunarLander-v3", render_mode="rgb_array", **env_kwargs)
         if self.mode == "duel":
-            self.ai_env = gym.make("LunarLander-v3", render_mode="rgb_array")
+            self.ai_env = gym.make("LunarLander-v3", render_mode="rgb_array", **env_kwargs)
         else:
             self.ai_env = None
 
@@ -255,8 +268,11 @@ class LanderDuelGame:
         controls_surf = self.font_hud.render(controls_text, True, COLOR_TEXT_SECONDARY)
         self.screen.blit(controls_surf, (20, 44))
 
-        seed_text = f"SEED: {self.current_seed} | AI AGENT: {self.model_name}"
-        seed_surf = self.font_hud.render(seed_text, True, COLOR_TEXT_MUTED)
+        if self.enable_wind:
+            seed_text = f"WIND: {self.wind_power:.1f} m/s | SEED: {self.current_seed} | AI: {self.model_name}"
+        else:
+            seed_text = f"SEED: {self.current_seed} | AI AGENT: {self.model_name}"
+        seed_surf = self.font_hud.render(seed_text, True, COLOR_AMBER if self.enable_wind else COLOR_TEXT_MUTED)
         self.screen.blit(seed_surf, (self.win_width - seed_surf.get_width() - 20, 44))
 
         # 2. Viewports
@@ -430,6 +446,17 @@ def parse_args() -> argparse.Namespace:
         default=50,
         help="Target frames per second (default: 50).",
     )
+    parser.add_argument(
+        "--wind",
+        action="store_true",
+        help="Enable Box2D aerodynamic crosswinds and turbulence.",
+    )
+    parser.add_argument(
+        "--wind-power",
+        type=float,
+        default=15.0,
+        help="Wind strength magnitude (default: 15.0).",
+    )
     return parser.parse_args()
 
 
@@ -440,5 +467,7 @@ if __name__ == "__main__":
         mode=args.mode,
         seed=args.seed,
         target_fps=args.fps,
+        enable_wind=args.wind,
+        wind_power=args.wind_power,
     )
     game.run()
