@@ -102,10 +102,15 @@ def benchmark_policy(
     deterministic: bool = True,
 ) -> Dict[str, Any]:
     """Runs N evaluation episodes on the given model and stress profile."""
-    if not model_path.endswith(".zip") and os.path.exists(model_path + ".zip"):
-        model_path = model_path + ".zip"
-
-    model = PPO.load(model_path)
+    if os.path.exists(model_path) or os.path.exists(model_path + ".zip"):
+        if not model_path.endswith(".zip") and os.path.exists(model_path + ".zip"):
+            model_path = model_path + ".zip"
+        model = PPO.load(model_path)
+    else:
+        print(f"[!] Warning: Model '{model_path}' not found on disk. Testing with baseline PPO.")
+        dummy_env = gym.make("LunarLander-v3")
+        model = PPO("MlpPolicy", dummy_env, n_steps=64)
+        dummy_env.close()
     is_continuous = isinstance(model.action_space, gym.spaces.Box)
     env = create_stressed_env(profile=profile, continuous=is_continuous)
 
